@@ -28,6 +28,30 @@ const RoleModel = db.define(
   },
 );
 
+const VerifyCodeModel = db.define(
+  "verify_Codes",
+  {
+    ID: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    code: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
 const UserModel = db.define(
   "users",
   {
@@ -89,4 +113,5 @@ db.sync();
 module.exports = {
   RoleModel,
   UserModel,
+  VerifyCodeModel,
 };

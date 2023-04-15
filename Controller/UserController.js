@@ -1,4 +1,4 @@
-const { RoleModel, UserModel } = require("../Model");
+const { RoleModel, UserModel, VerifyCodeModel } = require("../Model");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -104,6 +104,7 @@ const UserController = {
     const email = req.body.email;
     const phone = req.body.phone;
     const password = req.body.password;
+    const code = req.body.code;
 
     if (!fullName || !email || !phone || !password) {
       res.status(401).json({
@@ -113,37 +114,41 @@ const UserController = {
       //check exist user
       const user = await UserModel.findOne({
         where: {
-          [Op.or]: [{ email: email }, { phone: phone }],
+          phone: phone,
         },
       });
       if (user) {
-        if (user.dataValues.email === email) {
-          return res.status(401).json({
-            message: "Email đã đăng ký",
-          });
-        }
-        if (user.dataValues.phone === phone) {
-          return res.status(401).json({
-            message: "Số điện thoại đã đăng ký",
-          });
-        }
+        res.status(401).json({
+          message: "Số điện thoại đã đăng ký",
+        });
       } else {
-        try {
-          const salt = await bcrypt.genSalt(10);
-          const passwordHashed = await bcrypt.hash(password, salt);
-          await UserModel.create({
-            full_Name: fullName,
-            email: email,
-            phone: phone,
-            password: passwordHashed,
-          });
-          res.status(200).json({
-            message: "Đăng ký tài khoản thành công",
-          });
-        } catch (error) {
-          res.status(500).json({
-            message: "Lỗi server!",
-            error,
+        const valid = await VerifyCodeModel.findOne({
+          where: {
+            [Op.and]: [{ email: email }, { code: code }],
+          },
+        });
+        if (valid) {
+          try {
+            const salt = await bcrypt.genSalt(10);
+            const passwordHashed = await bcrypt.hash(password, salt);
+            await UserModel.create({
+              full_Name: fullName,
+              email: email,
+              phone: phone,
+              password: passwordHashed,
+            });
+            res.status(200).json({
+              message: "Đăng ký tài khoản thành công",
+            });
+          } catch (error) {
+            res.status(500).json({
+              message: "Lỗi server!",
+              error,
+            });
+          }
+        } else {
+          res.status(401).json({
+            message: "Mã xác nhận không đúng",
           });
         }
       }

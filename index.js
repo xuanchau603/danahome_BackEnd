@@ -4,7 +4,7 @@ const path = require("path");
 const cors = require("cors");
 const app = express();
 
-const { authRoutes } = require("./Routes");
+const { authRoutes, verifyRoutes } = require("./Routes");
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", authRoutes);
+app.use("/verifyCode", verifyRoutes);
 
 app.listen(802, () => {
   console.log("Server is running at port 802");
