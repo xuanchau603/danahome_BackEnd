@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 
 const middlewareController = {
   verifyToken: async (req, res, next) => {

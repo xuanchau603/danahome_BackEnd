@@ -1,6 +1,7 @@
 const express = require("express");
 const authRoutes = express.Router();
 const verifyRoutes = express.Router();
+const newsRoutes = express.Router();
 
 //middleware
 const middlewareController = require("../Controller/middlewareController");
@@ -8,6 +9,7 @@ const middlewareController = require("../Controller/middlewareController");
 //Controller
 const UserController = require("../Controller/UserController");
 const VerifyCodeController = require("../Controller/VerifyCodeController");
+const NewsController = require("../Controller/NewsController");
 
 //Authentication route
 
@@ -24,10 +26,21 @@ authRoutes.get(
 authRoutes.post("/login", UserController.loginUser);
 authRoutes.post("/register", UserController.registerUser);
 
+//VerifyCode route
+verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
+
+//News route
+newsRoutes.get("/", middlewareController.verifyToken, NewsController.getNews);
+newsRoutes.get("/hot", NewsController.getNewsHot);
+
+newsRoutes.post(
+  "/create",
+  middlewareController.verifyToken,
+  NewsController.createNews,
+);
+
 module.exports = {
   authRoutes,
   verifyRoutes,
+  newsRoutes,
 };
-
-//VerifyCode route
-verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);

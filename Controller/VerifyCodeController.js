@@ -16,10 +16,29 @@ const VerifyCodeController = {
         });
       } else {
         const code = Math.floor(Math.random() * (999999 - 100000)) + 100000;
-        const newVerify = await VerifyCodeModel.create({
+
+        const isExist = await VerifyCodeModel.findOne({
+          where: {
+            email: email,
+          },
+        });
+        if (isExist) {
+          return res.status(403).json({
+            message: "Vui lòng thử lại sau 1 phút!",
+          });
+        }
+
+        const newCode = await VerifyCodeModel.create({
           email: email,
           code: code,
         });
+        setTimeout(async () => {
+          await VerifyCodeModel.destroy({
+            where: {
+              ID: newCode.dataValues.ID,
+            },
+          });
+        }, 60000);
         const transporter = nodemailer.createTransport({
           // config mail server
           service: "Gmail",
@@ -34,17 +53,53 @@ const VerifyCodeController = {
           to: email,
           subject: "Mã xác nhận đăng ký tài khoản DaNaHome",
           text: "You recieved message from " + req.body.email,
-          html: `<h1 style="font-size: 30px; color: rgb(0, 0, 0)">
-          Nhập mã xác nhận này để đăng ký tài khoản tại
-          <b style="color: rgb(2, 174, 28)">DaNaHome</b>
-        </h1> <b style=" font-size: 24px; display: block"
-          >Mã xác nhận: <b style="font-size: 28px; color: rgb(2, 174, 28)">${code}</b>
-        </b> <b style=" font-size: 24px; display: block"
-        >Thời gian hết hạn:
-        <b style="color: rgb(255, 46, 46)">${new Date(
-          new Date().getTime() + 60000,
-        ).toLocaleString()}</b>
-      </b>`,
+          html: `<div class=""><div class="aHl"></div><div id=":io" tabindex="-1"></div><div id=":id" class="ii gt" jslog="20277; u014N:xr6bB; 1:WyIjdGhyZWFkLWY6MTc2MjM0NTU1MzYxMDQxODU0MyIsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsW11d; 4:WyIjbXNnLWY6MTc2MjM0NTU1MzYxMDQxODU0MyIsbnVsbCxbXV0."><div id=":ic" class="a3s aiL "><div class="adM">
+      </div><table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%!important">
+        <tbody><tr><td align="center">
+      <table style="border:1px solid #eaeaea;border-radius:5px;margin:40px 0" width="600" border="0" cellspacing="0" cellpadding="40">
+        <tbody><tr><td align="center"><div style="font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;text-align:left;width:465px">
+      
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%!important">
+        <tbody><tr><td align="center">
+        <div><h1 style="color: green">DaNaHome</h1></div>
+        <h1 style="color:#000;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:24px;font-weight:normal;margin:30px 0;padding:0">Xác minh email của bạn để đăng ký tại <b>DaNaHome</b></h1>
+      </td></tr>
+      </tbody></table>
+      
+      <p style="color:#000;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:14px;line-height:24px">Chúng tôi đã nhận được một yêu cầu đăng ký từ email: </p>
+      <br>
+      
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%!important">
+        <tbody><tr>
+          <td align="center" bgcolor="#f6f6f6" valign="middle" height="40" style="font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:16px;font-weight:bold">${email}</td>
+        </tr>
+      </tbody></table>
+      
+      <br>
+      <p style="color:#000;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:14px;line-height:24px">Để hoàn tất việc đăng ký vui lòng nhập mã xác nhận bên dưới để yêu cầu đăng ký của bạn được chấp nhận:</p>
+      <br>
+      
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%!important">
+        <tbody><tr><td align="center">
+      <div>
+        
+          <a  style="background-color:#c9ffd2;border-radius:5px;color:#000;display:inline-block;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:20px;font-weight:600;line-height:50px;text-align:center;text-decoration:none;width:200px" >${code}</a>
+        
+      </div>
+      </td></tr>
+      </tbody></table>
+      
+      <br>
+      <p style="color:#000;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:14px;line-height:24px"><b>Lưu ý</b>: Mã xác nhận này chỉ có hiệu lực trong vòng 60 giây kể từ lúc bạn nhận được email này</p>
+
+      <br>
+      <hr style="border:none;border-top:1px solid #eaeaea;margin:26px 0;width:100%">
+      <p style="color:#666666;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,&quot;Roboto&quot;,&quot;Oxygen&quot;,&quot;Ubuntu&quot;,&quot;Cantarell&quot;,&quot;Fira Sans&quot;,&quot;Droid Sans&quot;,&quot;Helvetica Neue&quot;,sans-serif;font-size:12px;line-height:24px">Nếu bạn không cố gắng đăng ký nhưng nhận được email này hoặc nếu vị trí không khớp, vui lòng bỏ qua email này. Nếu bạn lo lắng về sự an toàn của tài khoản, vui lòng trả lời email này để liên hệ với chúng tôi.</p>
+      </div></td></tr>
+      </tbody></table>
+      </td></tr>
+      </tbody></table><div class="yj6qo"></div><div class="adL">
+      </div></div></div><div id=":is" class="ii gt" style="display:none"><div id=":it" class="a3s aiL "></div></div><div class="hi"></div></div>`,
         };
         transporter.sendMail(mainOptions, function (err, info) {
           if (err) {
@@ -54,17 +109,9 @@ const VerifyCodeController = {
           }
         });
 
-        setTimeout(() => {
-          VerifyCodeModel.destroy({
-            where: {
-              ID: newVerify.dataValues.ID,
-            },
-          });
-        }, 60000);
-
         res.status(200).json({
           message: "Vui lòng kiểm tra email để lấy mã xác nhận",
-          expires: new Date(new Date().getTime() + 60000).toLocaleString(),
+          Expires_later: 60000,
         });
       }
     } catch (error) {
