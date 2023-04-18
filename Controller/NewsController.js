@@ -3,38 +3,11 @@ const {
   CateRoomModel,
   CateNewsModel,
   NewsModel,
+  ImagesModel,
 } = require("../Model");
+const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/images/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "." + file.originalname.split(".")[1]);
-  },
-});
-
-const multi_upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype == "image/png" ||
-      file.mimetype == "image/jpg" ||
-      file.mimetype == "image/jpeg"
-    ) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-      const err = new Error("Only .png, .jpg and .jpeg format allowed!");
-      err.name = "ExtensionError";
-      return cb(err);
-    }
-  },
-}).array("images", 2);
 
 const NewsController = {
   getNews: async (req, res) => {
@@ -61,9 +34,19 @@ const NewsController = {
       include: [
         {
           model: CateRoomModel,
+          attributes: ["name"],
         },
         {
           model: CateNewsModel,
+          attributes: ["name"],
+        },
+        {
+          model: UserModel,
+          attributes: ["full_Name", "phone", "image_URL"],
+        },
+        {
+          model: ImagesModel,
+          attributes: ["image_URL"],
         },
       ],
       where: {
@@ -71,85 +54,80 @@ const NewsController = {
       },
     });
 
+    const newData = news.map((item) => {
+      const { category_Room, category_New, user, images, ...data } =
+        item.dataValues;
+
+      return {
+        ...data,
+        featured_Image: item.dataValues.images[0].image_URL,
+        total_Image: item.dataValues.images.length,
+        poster: item.dataValues.user.full_Name,
+        poster_Phone: item.dataValues.user.phone,
+        poster_Image_URL: item.dataValues.user.Image_URL,
+        roomType: item.dataValues.category_Room.name,
+        newsType: item.dataValues.category_New.name,
+      };
+    });
+
     res.status(200).json({
       message: "Thành công",
-      data: news,
+      data: newData,
     });
   },
   createNews: async (req, res) => {
     const user_Id = req.user.id;
-    const category_Rooms_Id = req.body.roomType;
-    const categorys_News_Id = req.body.newsType;
-    const province = req.body.province;
-    const district = req.body.district;
-    const ward = req.body.ward;
-    const house_Number = req.body.house_Number;
-    const title = req.body.title;
-    const description = req.body.description;
-    const price = req.body.price;
-    const acreage = req.body.acreage;
-    const status = req.body.status;
-    const expire_At = req.body.expire_At;
 
-    multi_upload(req, res, function (err) {
-      if (err instanceof multer.MulterError) {
-        // A Multer error occurred when uploading.
-        res
-          .status(500)
-          .json({
-            error: { message: `Multer uploading error: ${err.message}` },
-          })
-          .end();
-        return;
-      } else if (err) {
-        // An unknown error occurred when uploading.
-        if (err.name == "ExtensionError") {
-          res
-            .status(413)
-            .json({ error: { message: err.message } })
-            .end();
-        } else {
-          res
-            .status(500)
-            .json({
-              error: { message: `unknown uploading error: ${err.message}` },
-            })
-            .end();
-        }
-        return;
+    try {
+      const category_Rooms_Id = req.body.roomType;
+      const categorys_News_Id = req.body.newsType;
+      const province = req.body.province;
+      const district = req.body.district;
+      const ward = req.body.ward;
+      const house_Number = req.body.house_Number;
+      const title = req.body.title;
+      const description = req.body.description;
+      const price = req.body.price;
+      const acreage = req.body.acreage;
+      const status = req.body.status;
+      const expire_At = req.body.expire_At;
+
+      const news = await NewsModel.create({
+        province: province,
+        district: district,
+        ward: ward,
+        house_Number: house_Number,
+        title: title,
+        description: description,
+        price: price,
+        acreage: acreage,
+        status: status,
+        expire_At: expire_At,
+        user_Id: user_Id,
+        category_Rooms_Id: category_Rooms_Id,
+        categorys_News_Id: categorys_News_Id,
+      });
+
+      const listImages = req.files.map((item) => {
+        return {
+          news_Id: news.dataValues.ID,
+          image_URL: `http://localhost:802/${item.destination}${item.filename}`,
+        };
+      });
+
+      await ImagesModel.bulkCreate(listImages);
+
+      res.status(200).json({
+        message: "Đăng tin thành công",
+      });
+    } catch (error) {
+      for (var item of req.files) {
+        // fs.unlinkSync(item.path);
       }
-
-      // Everything went fine.
-      // show file `req.files`
-      // show body `req.body`
-      res.status(200).json(req.files);
-    });
-
-    // try {
-    //   const news = await NewsModel.create({
-    //     province: province,
-    //     district: district,
-    //     ward: ward,
-    //     house_Number: house_Number,
-    //     title: title,
-    //     description: description,
-    //     price: price,
-    //     acreage: acreage,
-    //     status: status,
-    //     expire_At: expire_At,
-    //     user_Id: user_Id,
-    //     category_Rooms_Id: category_Rooms_Id,
-    //     categorys_News_Id: categorys_News_Id,
-    //   });
-
-    //   res.status(200).json({
-    //     message: "Đăng tin thành công",
-    //   });
-    // } catch (error) {
-    //   res.status(500).json({
-    //     message: "Lỗi server",
-    //   });
-    // }
+      res.status(500).json({
+        message: "Lỗi server",
+      });
+    }
   },
 };
 

@@ -229,6 +229,33 @@ const NewsModel = db.define(
   },
 );
 
+const ImagesModel = db.define(
+  "images",
+  {
+    ID: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    image_URL: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    news_Id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: NewsModel,
+        key: "ID",
+      },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
 RoleModel.hasMany(UserModel, { foreignKey: "role_Id" });
 UserModel.belongsTo(RoleModel, { foreignKey: "role_Id" });
 
@@ -237,6 +264,12 @@ NewsModel.belongsTo(CateRoomModel, { foreignKey: "category_Rooms_Id" });
 
 CateNewsModel.hasMany(NewsModel, { foreignKey: "categorys_News_Id" });
 NewsModel.belongsTo(CateNewsModel, { foreignKey: "categorys_News_Id" });
+
+UserModel.hasMany(NewsModel, { foreignKey: "user_Id" });
+NewsModel.belongsTo(UserModel, { foreignKey: "user_Id" });
+
+NewsModel.hasMany(ImagesModel, { foreignKey: "news_Id" });
+ImagesModel.belongsTo(NewsModel, { foreignKey: "news_Id" });
 
 db.sync();
 
@@ -247,4 +280,5 @@ module.exports = {
   CateRoomModel,
   CateNewsModel,
   NewsModel,
+  ImagesModel,
 };
