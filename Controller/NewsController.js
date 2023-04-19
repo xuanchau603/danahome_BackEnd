@@ -6,8 +6,6 @@ const {
   ImagesModel,
 } = require("../Model");
 const fs = require("fs");
-const path = require("path");
-const multer = require("multer");
 
 const NewsController = {
   getNews: async (req, res) => {
@@ -74,6 +72,61 @@ const NewsController = {
       message: "Thành công",
       data: newData,
     });
+  },
+  getDetailsNews: async (req, res) => {
+    try {
+      const newsId = req.params.id;
+      const news = await NewsModel.findByPk(newsId, {
+        include: [
+          {
+            model: CateRoomModel,
+            attributes: ["name"],
+          },
+          {
+            model: CateNewsModel,
+            attributes: ["name"],
+          },
+          {
+            model: UserModel,
+            attributes: ["full_Name", "phone", "image_URL"],
+          },
+          {
+            model: ImagesModel,
+            attributes: ["image_URL"],
+          },
+        ],
+      });
+      if (news) {
+        const {
+          category_Rooms_Id,
+          categorys_News_Id,
+          category_Room,
+          category_New,
+          user,
+          ...newData
+        } = news.dataValues;
+
+        res.status(200).json({
+          message: "Thành công",
+          data: {
+            ...newData,
+            poster: news.dataValues.user.full_Name,
+            poster_Phone: news.dataValues.user.phone,
+            poster_Image_URL: news.dataValues.user.image_URL,
+            roomType: news.dataValues.category_Room.name,
+            newsType: news.dataValues.category_New.name,
+          },
+        });
+      } else {
+        res.status(404).json({
+          message: "Tin này không tồn tại",
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        message: "Lỗi server",
+      });
+    }
   },
   createNews: async (req, res) => {
     const user_Id = req.user.id;
