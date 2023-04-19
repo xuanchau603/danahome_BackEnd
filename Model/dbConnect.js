@@ -1,7 +1,7 @@
 const { Sequelize } = require("sequelize");
 
-const db = new Sequelize("db_danahome", "root", "", {
-  host: "localhost",
+const db = new Sequelize("sql12613417", "sql12613417", "hqvQNgqRu8", {
+  host: "sql12.freemysqlhosting.net",
   dialect: "mysql",
   logging: true,
   timezone: "+07:00", // for writing to database

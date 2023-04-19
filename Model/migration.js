@@ -3,8 +3,9 @@ const { DataTypes } = require("sequelize");
 const db = require("./dbConnect");
 
 const queryInterface = db.getQueryInterface();
-queryInterface.changeColumn("users", "phone", {
-  type: DataTypes.STRING,
+queryInterface.changeColumn("news", "status", {
+  type: DataTypes.INTEGER,
+  defaultValue: 0,
   allowNull: false,
 });
 

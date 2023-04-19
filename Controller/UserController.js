@@ -117,6 +117,7 @@ const UserController = {
           phone: phone,
         },
       });
+
       if (user) {
         res.status(401).json({
           message: "Số điện thoại đã đăng ký",

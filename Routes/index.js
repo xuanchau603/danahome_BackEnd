@@ -40,6 +40,12 @@ newsRoutes.post(
   NewsController.createNews,
 );
 
+newsRoutes.delete(
+  "/delete/:id",
+  middlewareController.verifyToken,
+  NewsController.deleteNews,
+);
+
 module.exports = {
   authRoutes,
   verifyRoutes,

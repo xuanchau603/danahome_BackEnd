@@ -64,7 +64,7 @@ const UserModel = db.define(
     role_Id: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: "d79b924c-d9e4-11ed-911b-2cf05ddd2632	",
+      defaultValue: "d79b924c-d9e4-11ed-911b-2cf05ddd2632",
       references: {
         model: RoleModel,
         key: "ID",
@@ -192,6 +192,7 @@ const NewsModel = db.define(
     },
     status: {
       type: DataTypes.INTEGER,
+      defaultValue: 0,
       allowNull: false,
     },
     expire_At: {

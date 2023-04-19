@@ -64,7 +64,7 @@ const NewsController = {
         total_Image: item.dataValues.images.length,
         poster: item.dataValues.user.full_Name,
         poster_Phone: item.dataValues.user.phone,
-        poster_Image_URL: item.dataValues.user.Image_URL,
+        poster_Image_URL: item.dataValues.user.image_URL,
         roomType: item.dataValues.category_Room.name,
         newsType: item.dataValues.category_New.name,
       };
@@ -77,7 +77,6 @@ const NewsController = {
   },
   createNews: async (req, res) => {
     const user_Id = req.user.id;
-
     try {
       const category_Rooms_Id = req.body.roomType;
       const categorys_News_Id = req.body.newsType;
@@ -101,7 +100,7 @@ const NewsController = {
         description: description,
         price: price,
         acreage: acreage,
-        status: status,
+        status: status ? status : 0,
         expire_At: expire_At,
         user_Id: user_Id,
         category_Rooms_Id: category_Rooms_Id,
@@ -122,8 +121,45 @@ const NewsController = {
       });
     } catch (error) {
       for (var item of req.files) {
-        // fs.unlinkSync(item.path);
+        fs.unlinkSync(item.path);
       }
+      res.status(500).json({
+        message: "Lỗi server",
+      });
+    }
+  },
+  deleteNews: async (req, res) => {
+    try {
+      const id = req.params.id;
+      //check news
+      const news = await NewsModel.findByPk(id);
+      if (news) {
+        const images = await ImagesModel.findAll({
+          where: {
+            news_Id: id,
+          },
+        });
+        for (var item of images) {
+          const path = item.dataValues.image_URL.split(
+            "http://localhost:802/",
+          )[1];
+          fs.unlinkSync(path);
+        }
+
+        await NewsModel.destroy({
+          where: {
+            ID: id,
+          },
+        });
+        res.status(200).json({
+          message: "Xóa thành công",
+        });
+      } else {
+        res.status(404).json({
+          message: "Tin này không tồn tại",
+        });
+      }
+    } catch (error) {
       res.status(500).json({
         message: "Lỗi server",
       });
