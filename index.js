@@ -20,6 +20,6 @@ app.use("/users", authRoutes);
 app.use("/verifyCode", verifyRoutes);
 app.use("/news", newsRoutes);
 
-app.listen(802, () => {
+app.listen(8002, () => {
   console.log("Server is running at port 802");
 });
