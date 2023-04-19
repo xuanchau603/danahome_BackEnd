@@ -87,7 +87,7 @@ const middlewareController = {
       // show file `req.files`
       // show body `req.body`
       console.log(req.files);
-      if (!req.files) {
+      if (!req.files || req.files.length === 0) {
         res
           .status(500)
           .json({

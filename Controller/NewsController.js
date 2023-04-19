@@ -54,25 +54,25 @@ const NewsController = {
       },
     });
 
-    const newData = news.map((item) => {
-      const { category_Room, category_New, user, images, ...data } =
-        item.dataValues;
+    // const newData = news.map((item) => {
+    //   const { category_Room, category_New, user, images, ...data } =
+    //     item.dataValues;
 
-      return {
-        ...data,
-        featured_Image: item.dataValues.images[0].image_URL,
-        total_Image: item.dataValues.images.length,
-        poster: item.dataValues.user.full_Name,
-        poster_Phone: item.dataValues.user.phone,
-        poster_Image_URL: item.dataValues.user.image_URL,
-        roomType: item.dataValues.category_Room.name,
-        newsType: item.dataValues.category_New.name,
-      };
-    });
+    //   return {
+    //     ...data,
+    //     featured_Image: item.dataValues.images[0].image_URL,
+    //     total_Image: item.dataValues.images.length,
+    //     poster: item.dataValues.user.full_Name,
+    //     poster_Phone: item.dataValues.user.phone,
+    //     poster_Image_URL: item.dataValues.user.image_URL,
+    //     roomType: item.dataValues.category_Room.name,
+    //     newsType: item.dataValues.category_New.name,
+    //   };
+    // });
 
     res.status(200).json({
       message: "Thành công",
-      data: newData,
+      data: news,
     });
   },
   createNews: async (req, res) => {
@@ -110,7 +110,7 @@ const NewsController = {
       const listImages = req.files.map((item) => {
         return {
           news_Id: news.dataValues.ID,
-          image_URL: `http://localhost:802/${item.destination}${item.filename}`,
+          image_URL: `https://danahome.onrender.com/${item.destination}${item.filename}`,
         };
       });
 
@@ -141,7 +141,7 @@ const NewsController = {
         });
         for (var item of images) {
           const path = item.dataValues.image_URL.split(
-            "http://localhost:802/",
+            "https://danahome.onrender.com/",
           )[1];
           fs.unlinkSync(path);
         }
