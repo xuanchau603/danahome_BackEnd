@@ -110,7 +110,7 @@ const NewsController = {
       const listImages = req.files.map((item) => {
         return {
           news_Id: news.dataValues.ID,
-          image_URL: `https://danahome.onrender.com/${item.destination}${item.filename}`,
+          image_URL: `https://dn.onrender.com/${item.destination}${item.filename}`,
         };
       });
 
@@ -141,7 +141,7 @@ const NewsController = {
         });
         for (var item of images) {
           const path = item.dataValues.image_URL.split(
-            "https://danahome.onrender.com/",
+            "https://dn.onrender.com/",
           )[1];
           fs.unlinkSync(path);
         }
