@@ -86,7 +86,7 @@ const middlewareController = {
       // Everything went fine.
       // show file `req.files`
       // show body `req.body`
-      console.log(req.body);
+      console.log(req.files);
       if (!req.files) {
         res
           .status(500)
