@@ -97,7 +97,7 @@ const UserModel = db.define(
     image_URL: {
       type: DataTypes.STRING,
       defaultValue:
-        "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon.png",
+        "https://res.cloudinary.com/di5qmcigy/image/upload/v1682065006/avatar_user/285-2856724_user-avatar-enter-free-photo-user-avatar-green-removebg-preview_r828vh.png",
     },
   },
   {

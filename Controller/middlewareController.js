@@ -18,7 +18,7 @@ const storageImages = new CloudinaryStorage({
 });
 
 const uploadCloudImages = multer({ storage: storageImages });
-const upload = uploadCloudImages.array("images", 4);
+const upload = uploadCloudImages.array("images", 10);
 
 const middlewareController = {
   verifyToken: async (req, res, next) => {

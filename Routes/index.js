@@ -30,7 +30,7 @@ authRoutes.post("/register", UserController.registerUser);
 verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
 
 //News route
-newsRoutes.get("/", middlewareController.verifyToken, NewsController.getNews);
+newsRoutes.get("/", NewsController.getAllNews);
 newsRoutes.get("/hot", NewsController.getNewsHot);
 newsRoutes.get("/:id", NewsController.getDetailsNews);
 

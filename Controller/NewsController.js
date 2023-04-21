@@ -8,26 +8,57 @@ const {
 const cloudinary = require("cloudinary").v2;
 
 const NewsController = {
-  getNews: async (req, res) => {
+  getAllNews: async (req, res) => {
+    const page = req.query.page - 1 || 0;
+
     const news = await NewsModel.findAll({
       include: [
         {
           model: CateRoomModel,
+          attributes: ["name"],
         },
         {
           model: CateNewsModel,
+          attributes: ["name"],
+        },
+        {
+          model: UserModel,
+          attributes: ["full_Name", "phone", "image_URL"],
+        },
+        {
+          model: ImagesModel,
+          attributes: ["image_URL"],
         },
       ],
+      order: [["createdAt", "DESC"]],
+      offset: page,
+      limit: 10,
     });
 
-    console.log(news[0].dataValues.expire_At - news[0].dataValues.createdAt);
+    const newData = news.map((item) => {
+      const { category_Room, category_New, user, images, ...data } =
+        item.dataValues;
+
+      return {
+        ...data,
+        featured_Image: item.dataValues.images[0]?.image_URL,
+        total_Image: item.dataValues.images.length,
+        poster: item.dataValues.user.full_Name,
+        poster_Phone: item.dataValues.user.phone,
+        poster_Image_URL: item.dataValues.user.image_URL,
+        roomType: item.dataValues.category_Room.name,
+        newsType: item.dataValues.category_New.name,
+      };
+    });
 
     res.status(200).json({
       message: "Thành công",
-      data: news,
+      data: newData,
     });
   },
   getNewsHot: async (req, res) => {
+    const page = req.query.page - 1 || 0;
+
     const news = await NewsModel.findAll({
       include: [
         {
@@ -50,6 +81,9 @@ const NewsController = {
       where: {
         categorys_News_Id: "f3a4bbd9-dc42-11ed-8c1c-2cf05ddd2632",
       },
+      order: [["createdAt", "DESC"]],
+      offset: page,
+      limit: 10,
     });
 
     const newData = news.map((item) => {
