@@ -63,8 +63,8 @@ const NewsController = {
         poster: item.dataValues.user.full_Name,
         poster_Phone: item.dataValues.user.phone,
         poster_Image_URL: item.dataValues.user.image_URL,
-        // roomType: item.dataValues.category_Room.name,
-        // newsType: item.dataValues.category_New.name,
+        roomType: item.dataValues.category_Room.name,
+        newsType: item.dataValues.category_New.name,
       };
     });
 
