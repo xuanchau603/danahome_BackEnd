@@ -1,11 +1,16 @@
 const { Sequelize } = require("sequelize");
 
-const db = new Sequelize("sql12613417", "sql12613417", "hqvQNgqRu8", {
-  host: "sql12.freemysqlhosting.net",
-  dialect: "mysql",
-  logging: true,
-  timezone: "+07:00", // for writing to database
-});
+const db = new Sequelize(
+  "bdsnpcox_danahome",
+  "bdsnpcox_lxcdb",
+  "lexuanchau2001",
+  {
+    host: "free02.123host.vn",
+    dialect: "mysql",
+    logging: true,
+    timezone: "+07:00", // for writing to database
+  },
+);
 
 const connect = async () => {
   try {

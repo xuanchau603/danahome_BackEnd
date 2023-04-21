@@ -37,7 +37,7 @@ newsRoutes.get("/:id", NewsController.getDetailsNews);
 newsRoutes.post(
   "/create",
   middlewareController.verifyToken,
-  middlewareController.uploadImages,
+  middlewareController.uploadCloudImages,
   NewsController.createNews,
 );
 

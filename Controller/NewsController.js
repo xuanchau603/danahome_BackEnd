@@ -5,7 +5,7 @@ const {
   NewsModel,
   ImagesModel,
 } = require("../Model");
-const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
 
 const NewsController = {
   getNews: async (req, res) => {
@@ -63,8 +63,8 @@ const NewsController = {
         poster: item.dataValues.user.full_Name,
         poster_Phone: item.dataValues.user.phone,
         poster_Image_URL: item.dataValues.user.image_URL,
-        roomType: item.dataValues.category_Room.name,
-        newsType: item.dataValues.category_New.name,
+        // roomType: item.dataValues.category_Room.name,
+        // newsType: item.dataValues.category_New.name,
       };
     });
 
@@ -128,8 +128,9 @@ const NewsController = {
       });
     }
   },
-  createNews: async (req, res) => {
+  createNews: async (req, res, next) => {
     const user_Id = req.user.id;
+    console.log(req.files);
     try {
       const category_Rooms_Id = req.body.roomType;
       const categorys_News_Id = req.body.newsType;
@@ -143,7 +144,6 @@ const NewsController = {
       const acreage = req.body.acreage;
       const status = req.body.status;
       const expire_At = req.body.expire_At;
-
       const news = await NewsModel.create({
         province: province,
         district: district,
@@ -159,22 +159,28 @@ const NewsController = {
         category_Rooms_Id: category_Rooms_Id,
         categorys_News_Id: categorys_News_Id,
       });
-
       const listImages = req.files.map((item) => {
         return {
           news_Id: news.dataValues.ID,
-          image_URL: `https://danahome.onrender.com/${item.destination}${item.filename}`,
+          image_URL: item.path,
         };
       });
-
       await ImagesModel.bulkCreate(listImages);
-
       res.status(200).json({
         message: "Đăng tin thành công",
       });
     } catch (error) {
       for (var item of req.files) {
-        fs.unlinkSync(item.path);
+        cloudinary.api.delete_resources(
+          item.filename,
+          function (error, result) {
+            if (error) {
+              return res.status(501).json({
+                message: error,
+              });
+            }
+          },
+        );
       }
       res.status(500).json({
         message: "Lỗi server",
@@ -192,11 +198,25 @@ const NewsController = {
             news_Id: id,
           },
         });
+
         for (var item of images) {
-          const path = item.dataValues.image_URL.split(
-            "https://danahome.onrender.com/",
-          )[1];
-          fs.unlinkSync(path);
+          const path =
+            item.dataValues.image_URL
+              .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+              .split(".")[0]
+              .split("/")[1] +
+            "/" +
+            item.dataValues.image_URL
+              .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+              .split(".")[0]
+              .split("/")[2];
+          cloudinary.api.delete_resources(path, function (error, result) {
+            if (error) {
+              return res.status(501).json({
+                message: error,
+              });
+            }
+          });
         }
 
         await NewsModel.destroy({
