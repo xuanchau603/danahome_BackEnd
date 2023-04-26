@@ -6,11 +6,17 @@ const {
   ImagesModel,
 } = require("../Model");
 const cloudinary = require("cloudinary").v2;
+const { Op } = require("sequelize");
+
+console.log(NewsModel);
 
 const NewsController = {
   getAllNews: async (req, res) => {
-    const page = req.query.page - 1 || 0;
+    const orderBy = req.query.orderBy || "createdAt";
+    const orderType = req.query.orderType || "DESC";
+    console.log(orderBy);
 
+    const page = req.query.page - 1 || 0;
     const news = await NewsModel.findAll({
       include: [
         {
@@ -30,7 +36,81 @@ const NewsController = {
           attributes: ["image_URL"],
         },
       ],
-      order: [["createdAt", "DESC"]],
+      where: {
+        [Op.and]: [
+          {
+            category_Rooms_Id: req.query.roomsType
+              ? {
+                  [Op.like]: req.query.roomsType,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            province: req.query.province
+              ? {
+                  [Op.like]: req.query.province,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            district: req.query.district
+              ? {
+                  [Op.like]: req.query.district,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            ward: req.query.ward
+              ? {
+                  [Op.like]: req.query.ward,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            price: req.query.priceTo
+              ? {
+                  [Op.and]:
+                    req.query.priceFrom === req.query.priceTo
+                      ? {
+                          [Op.gte]: req.query.priceTo,
+                        }
+                      : {
+                          [Op.gte]: req.query.priceFrom,
+                          [Op.lte]: req.query.priceTo,
+                        },
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            acreage: req.query.acreageTo
+              ? {
+                  [Op.and]:
+                    req.query.acreageFrom === req.query.acreageTo
+                      ? {
+                          [Op.gte]: req.query.acreageTo,
+                        }
+                      : {
+                          [Op.gte]: req.query.priceFrom,
+                          [Op.lte]: req.query.priceTo,
+                        },
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+        ],
+      },
+      order: [[orderBy, orderType]],
       offset: page,
       limit: 10,
     });
@@ -54,6 +134,8 @@ const NewsController = {
     res.status(200).json({
       message: "Thành công",
       data: newData,
+      currentPage: page + 1,
+      totalNews: news.length,
     });
   },
   getNewsHot: async (req, res) => {
@@ -79,7 +161,7 @@ const NewsController = {
         },
       ],
       where: {
-        categorys_News_Id: "f3a4bbd9-dc42-11ed-8c1c-2cf05ddd2632",
+        categorys_News_Id: "b8bc8bc5-e417-11ed-99e0-ecf4bbc11824",
       },
       order: [["createdAt", "DESC"]],
       offset: page,
@@ -162,9 +244,8 @@ const NewsController = {
       });
     }
   },
-  createNews: async (req, res, next) => {
+  createNews: async (req, res) => {
     const user_Id = req.user.id;
-    console.log(req.files);
     try {
       const category_Rooms_Id = req.body.roomType;
       const categorys_News_Id = req.body.newsType;
@@ -178,6 +259,7 @@ const NewsController = {
       const acreage = req.body.acreage;
       const status = req.body.status;
       const expire_At = req.body.expire_At;
+      const object = req.body.object;
       const news = await NewsModel.create({
         province: province,
         district: district,
@@ -192,6 +274,7 @@ const NewsController = {
         user_Id: user_Id,
         category_Rooms_Id: category_Rooms_Id,
         categorys_News_Id: categorys_News_Id,
+        object: object,
       });
       const listImages = req.files.map((item) => {
         return {

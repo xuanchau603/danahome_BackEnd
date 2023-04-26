@@ -4,7 +4,12 @@ const path = require("path");
 const cors = require("cors");
 const app = express();
 
-const { authRoutes, verifyRoutes, newsRoutes } = require("./Routes");
+const {
+  authRoutes,
+  verifyRoutes,
+  newsRoutes,
+  cateRoutes,
+} = require("./Routes");
 
 app.use(cors());
 // app.use(express.json());
@@ -15,7 +20,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.get("/", (req, res) => {
   res.json("Welcome to server DanaHome");
 });
-
+app.use("/category", cateRoutes);
 app.use("/users", authRoutes);
 app.use("/verifyCode", verifyRoutes);
 app.use("/news", newsRoutes);

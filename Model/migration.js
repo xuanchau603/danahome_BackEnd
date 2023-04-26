@@ -1,12 +1,11 @@
-const { RoleModel, UserModel } = require("../Model");
 const { DataTypes } = require("sequelize");
 const db = require("./dbConnect");
 
 const queryInterface = db.getQueryInterface();
-queryInterface.changeColumn("users", "image_URL", {
-  type: DataTypes.STRING,
-  defaultValue:
-    "https://res.cloudinary.com/di5qmcigy/image/upload/v1682065006/avatar_user/285-2856724_user-avatar-enter-free-photo-user-avatar-green-removebg-preview_r828vh.png",
+queryInterface.changeColumn("users", "role_Id", {
+  type: DataTypes.UUID,
+  allowNull: false,
+  defaultValue: "e4bae67b-e413-11ed-99e0-ecf4bbc11824",
 });
 
-db.sync();
+db.sync({ alter: true });

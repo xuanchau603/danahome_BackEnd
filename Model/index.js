@@ -64,7 +64,7 @@ const UserModel = db.define(
     role_Id: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: "d79b924c-d9e4-11ed-911b-2cf05ddd2632",
+      defaultValue: "e4bae67b-e413-11ed-99e0-ecf4bbc11824",
       references: {
         model: RoleModel,
         key: "ID",
@@ -97,7 +97,7 @@ const UserModel = db.define(
     image_URL: {
       type: DataTypes.STRING,
       defaultValue:
-        "https://res.cloudinary.com/di5qmcigy/image/upload/v1682065006/avatar_user/285-2856724_user-avatar-enter-free-photo-user-avatar-green-removebg-preview_r828vh.png",
+        "https://res.cloudinary.com/di5qmcigy/image/upload/v1682486641/avatar_user/a_m4jkyd.png",
     },
   },
   {
@@ -190,6 +190,7 @@ const NewsModel = db.define(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+
     status: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -223,6 +224,10 @@ const NewsModel = db.define(
         model: CateNewsModel,
         key: "ID",
       },
+    },
+    object: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {

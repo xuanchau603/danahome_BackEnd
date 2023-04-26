@@ -2,6 +2,7 @@ const express = require("express");
 const authRoutes = express.Router();
 const verifyRoutes = express.Router();
 const newsRoutes = express.Router();
+const cateRoutes = express.Router();
 
 //middleware
 const middlewareController = require("../Controller/middlewareController");
@@ -10,6 +11,7 @@ const middlewareController = require("../Controller/middlewareController");
 const UserController = require("../Controller/UserController");
 const VerifyCodeController = require("../Controller/VerifyCodeController");
 const NewsController = require("../Controller/NewsController");
+const categoryController = require("../Controller/categoryController");
 
 //Authentication route
 
@@ -28,6 +30,10 @@ authRoutes.post("/register", UserController.registerUser);
 
 //VerifyCode route
 verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
+
+//Category route
+cateRoutes.get("/rooms", categoryController.getAllCategoryRooms);
+cateRoutes.get("/news", categoryController.getAllCategoryNews);
 
 //News route
 newsRoutes.get("/", NewsController.getAllNews);
@@ -51,4 +57,5 @@ module.exports = {
   authRoutes,
   verifyRoutes,
   newsRoutes,
+  cateRoutes,
 };
