@@ -8,13 +8,12 @@ const {
 const cloudinary = require("cloudinary").v2;
 const { Op } = require("sequelize");
 
-console.log(NewsModel);
-
 const NewsController = {
   getAllNews: async (req, res) => {
     const orderBy = req.query.orderBy || "createdAt";
     const orderType = req.query.orderType || "DESC";
-    console.log(orderBy);
+
+    console.log({ From: req.query.priceFrom, To: req.query.priceTo });
 
     const page = req.query.page - 1 || 0;
     const news = await NewsModel.findAll({
@@ -80,11 +79,11 @@ const NewsController = {
                   [Op.and]:
                     req.query.priceFrom === req.query.priceTo
                       ? {
-                          [Op.gte]: req.query.priceTo,
+                          [Op.gte]: req.query.priceTo * 1000000,
                         }
                       : {
-                          [Op.gte]: req.query.priceFrom,
-                          [Op.lte]: req.query.priceTo,
+                          [Op.gte]: req.query.priceFrom * 1000000,
+                          [Op.lte]: req.query.priceTo * 1000000,
                         },
                 }
               : {
@@ -100,8 +99,8 @@ const NewsController = {
                           [Op.gte]: req.query.acreageTo,
                         }
                       : {
-                          [Op.gte]: req.query.priceFrom,
-                          [Op.lte]: req.query.priceTo,
+                          [Op.gte]: req.query.acreageFrom,
+                          [Op.lte]: req.query.acreageTo,
                         },
                 }
               : {
@@ -111,7 +110,7 @@ const NewsController = {
         ],
       },
       order: [[orderBy, orderType]],
-      offset: page,
+      offset: page * 10,
       limit: 10,
     });
 
@@ -135,10 +134,11 @@ const NewsController = {
       message: "Thành công",
       data: newData,
       currentPage: page + 1,
-      totalNews: news.length,
+      totalNews: await NewsModel.count(),
     });
   },
   getNewsHot: async (req, res) => {
+    const roomType = req.query.roomType;
     const page = req.query.page - 1 || 0;
 
     const news = await NewsModel.findAll({
@@ -161,7 +161,14 @@ const NewsController = {
         },
       ],
       where: {
-        categorys_News_Id: "b8bc8bc5-e417-11ed-99e0-ecf4bbc11824",
+        [Op.and]: [
+          {
+            category_Rooms_Id: roomType ? roomType : { [Op.ne]: null },
+          },
+          {
+            categorys_News_Id: "b8bc8bc5-e417-11ed-99e0-ecf4bbc11824",
+          },
+        ],
       },
       order: [["createdAt", "DESC"]],
       offset: page,
