@@ -13,8 +13,6 @@ const NewsController = {
     const orderBy = req.query.orderBy || "createdAt";
     const orderType = req.query.orderType || "DESC";
 
-    console.log({ From: req.query.priceFrom, To: req.query.priceTo });
-
     const page = req.query.page - 1 || 0;
     const news = await NewsModel.findAll({
       include: [
@@ -103,6 +101,13 @@ const NewsController = {
                           [Op.lte]: req.query.acreageTo,
                         },
                 }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            user_Id: req.query.userId
+              ? req.query.userId
               : {
                   [Op.ne]: null,
                 },
