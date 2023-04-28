@@ -11,14 +11,24 @@ cloudinary.config({
 
 const storageImages = new CloudinaryStorage({
   cloudinary,
-  allowedFormats: ["jpg", "png"],
+  allowedFormats: ["jpg", "png", "jpeg"],
   params: {
     folder: "danahome_images",
   },
 });
 
+const storageAvatar = new CloudinaryStorage({
+  cloudinary,
+  allowedFormats: ["jpg", "png", "jpeg"],
+  params: {
+    folder: "avatar_user",
+  },
+});
+
 const uploadCloudImages = multer({ storage: storageImages });
+const uploadCloudAvartar = multer({ storage: storageAvatar });
 const upload = uploadCloudImages.array("images", 10);
+const uploadAvatar = uploadCloudAvartar.single("image", 1);
 
 const middlewareController = {
   verifyToken: async (req, res, next) => {
@@ -50,6 +60,19 @@ const middlewareController = {
   },
   uploadCloudImages: (req, res, next) => {
     upload(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        // A Multer error occurred when uploading.
+        return res.status(401).json(err);
+      } else if (err) {
+        // An unknown error occurred when uploading.
+        return res.status(501).json(err);
+      }
+      // Everything went fine.
+      next();
+    });
+  },
+  uploadCloudAvartar: (req, res, next) => {
+    uploadAvatar(req, res, function (err) {
       if (err instanceof multer.MulterError) {
         // A Multer error occurred when uploading.
         return res.status(401).json(err);

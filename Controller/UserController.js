@@ -2,6 +2,7 @@ const { RoleModel, UserModel, VerifyCodeModel } = require("../Model");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
 
 const UserController = {
   getAllUser: async (req, res) => {
@@ -153,6 +154,57 @@ const UserController = {
           });
         }
       }
+    }
+  },
+  editUser: async (req, res) => {
+    const userId = req.body.userId;
+    const email = req.body.email;
+    const fullName = req.body.fullName;
+    const phone = req.body.phone;
+    console.log(req.file.size === 76582);
+
+    try {
+      const user = await UserModel.findByPk(userId);
+      if (req.file.size === 76582) {
+        const path = req.file.filename;
+        cloudinary.api.delete_resources(path, function (error, result) {
+          if (error) {
+            return res.status(501).json({
+              message: error,
+            });
+          }
+        });
+      }
+      const updated = await UserModel.update(
+        {
+          email: email,
+          full_Name: fullName,
+          phone: phone,
+          image_URL:
+            req.file.size === 76582 ? user.dataValues.image_URL : req.file.path,
+        },
+        {
+          where: {
+            ID: userId,
+          },
+        },
+      );
+      res.status(200).json({
+        message: "Cập nhật thông tin tài khoản thành công",
+        data: updated,
+      });
+    } catch (error) {
+      const path = req.file.filename;
+      cloudinary.api.delete_resources(path, function (error, result) {
+        if (error) {
+          return res.status(501).json({
+            message: error,
+          });
+        }
+      });
+      res.status(500).json({
+        message: "Lỗi server",
+      });
     }
   },
 };

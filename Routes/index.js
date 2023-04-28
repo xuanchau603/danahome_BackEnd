@@ -27,6 +27,12 @@ authRoutes.get(
 );
 authRoutes.post("/login", UserController.loginUser);
 authRoutes.post("/register", UserController.registerUser);
+authRoutes.put(
+  "/edit",
+  middlewareController.verifyToken,
+  middlewareController.uploadCloudAvartar,
+  UserController.editUser,
+);
 
 //VerifyCode route
 verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
