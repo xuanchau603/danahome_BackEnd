@@ -164,7 +164,11 @@ const UserController = {
     try {
       const user = await UserModel.findByPk(userId);
 
-      if (req.file) {
+      if (
+        req.file &&
+        !user.dataValues.image_URL ===
+          "https://res.cloudinary.com/di5qmcigy/image/upload/v1682486641/avatar_user/a_m4jkyd.png"
+      ) {
         const path = `${
           user.dataValues.image_URL
             .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
