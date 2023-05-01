@@ -26,7 +26,7 @@ const NewsController = {
         },
         {
           model: UserModel,
-          attributes: ["full_Name", "phone", "image_URL"],
+          attributes: ["full_Name", "phone", "image_URL", "type"],
         },
         {
           model: ImagesModel,
@@ -144,6 +144,8 @@ const NewsController = {
         ward,
         ...data
       } = item.dataValues;
+      const subImages = [...item.dataValues.images];
+      subImages.splice(0, 1);
 
       return {
         ...data,
@@ -160,7 +162,9 @@ const NewsController = {
           name: ward.split(",")[1],
         },
         featured_Image: item.dataValues.images[0]?.image_URL,
+        subImages,
         total_Image: item.dataValues.images.length,
+        posterVIP: item.dataValues.user.type === 1,
         poster: item.dataValues.user.full_Name,
         poster_Phone: item.dataValues.user.phone,
         poster_Image_URL: item.dataValues.user.image_URL,
@@ -192,7 +196,7 @@ const NewsController = {
         },
         {
           model: UserModel,
-          attributes: ["full_Name", "phone", "image_URL"],
+          attributes: ["full_Name", "phone", "image_URL", "type"],
         },
         {
           model: ImagesModel,
@@ -225,6 +229,8 @@ const NewsController = {
         ward,
         ...data
       } = item.dataValues;
+      const subImages = [...item.dataValues.images];
+      subImages.splice(0, 1);
 
       return {
         ...data,
@@ -241,7 +247,9 @@ const NewsController = {
           name: ward.split(",")[1],
         },
         featured_Image: item.dataValues.images[0]?.image_URL,
+        subImages,
         total_Image: item.dataValues.images.length,
+        posterVIP: item.dataValues.user.type === 1,
         poster: item.dataValues.user.full_Name,
         poster_Phone: item.dataValues.user.phone,
         poster_Image_URL: item.dataValues.user.image_URL,
@@ -270,7 +278,7 @@ const NewsController = {
           },
           {
             model: UserModel,
-            attributes: ["full_Name", "phone", "image_URL"],
+            attributes: ["full_Name", "phone", "image_URL", "type"],
           },
           {
             model: ImagesModel,
@@ -305,6 +313,7 @@ const NewsController = {
               code: news.dataValues.ward.split(",")[0],
               name: news.dataValues.ward.split(",")[1],
             },
+            posterVIP: news.dataValues.user.type === 1,
             poster: news.dataValues.user.full_Name,
             poster_Phone: news.dataValues.user.phone,
             poster_Image_URL: news.dataValues.user.image_URL,
