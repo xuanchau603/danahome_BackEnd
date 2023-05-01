@@ -112,6 +112,20 @@ const NewsController = {
                   [Op.ne]: null,
                 },
           },
+          {
+            categorys_News_Id: req.query.categoryNewsId
+              ? req.query.categoryNewsId
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            status: req.query.status
+              ? req.query.status
+              : {
+                  [Op.ne]: null,
+                },
+          },
         ],
       },
       order: [[orderBy, orderType]],
@@ -120,11 +134,31 @@ const NewsController = {
     });
 
     const newData = news.map((item) => {
-      const { category_Room, category_New, user, images, ...data } =
-        item.dataValues;
+      const {
+        category_Room,
+        category_New,
+        user,
+        images,
+        province,
+        district,
+        ward,
+        ...data
+      } = item.dataValues;
 
       return {
         ...data,
+        province: {
+          code: province.split(",")[0],
+          name: province.split(",")[1],
+        },
+        district: {
+          code: district.split(",")[0],
+          name: district.split(",")[1],
+        },
+        ward: {
+          code: ward.split(",")[0],
+          name: ward.split(",")[1],
+        },
         featured_Image: item.dataValues.images[0]?.image_URL,
         total_Image: item.dataValues.images.length,
         poster: item.dataValues.user.full_Name,
@@ -181,11 +215,31 @@ const NewsController = {
     });
 
     const newData = news.map((item) => {
-      const { category_Room, category_New, user, images, ...data } =
-        item.dataValues;
+      const {
+        category_Room,
+        category_New,
+        user,
+        images,
+        province,
+        district,
+        ward,
+        ...data
+      } = item.dataValues;
 
       return {
         ...data,
+        province: {
+          code: province.split(",")[0],
+          name: province.split(",")[1],
+        },
+        district: {
+          code: district.split(",")[0],
+          name: district.split(",")[1],
+        },
+        ward: {
+          code: ward.split(",")[0],
+          name: ward.split(",")[1],
+        },
         featured_Image: item.dataValues.images[0]?.image_URL,
         total_Image: item.dataValues.images.length,
         poster: item.dataValues.user.full_Name,
@@ -220,14 +274,15 @@ const NewsController = {
           },
           {
             model: ImagesModel,
-            attributes: ["image_URL"],
+            attributes: ["ID", "image_URL"],
           },
         ],
       });
       if (news) {
         const {
-          category_Rooms_Id,
-          categorys_News_Id,
+          province,
+          district,
+          ward,
           category_Room,
           category_New,
           user,
@@ -238,6 +293,18 @@ const NewsController = {
           message: "Thành công",
           data: {
             ...newData,
+            province: {
+              code: news.dataValues.province.split(",")[0],
+              name: news.dataValues.province.split(",")[1],
+            },
+            district: {
+              code: news.dataValues.district.split(",")[0],
+              name: news.dataValues.district.split(",")[1],
+            },
+            ward: {
+              code: news.dataValues.ward.split(",")[0],
+              name: news.dataValues.ward.split(",")[1],
+            },
             poster: news.dataValues.user.full_Name,
             poster_Phone: news.dataValues.user.phone,
             poster_Image_URL: news.dataValues.user.image_URL,
@@ -364,6 +431,114 @@ const NewsController = {
     } catch (error) {
       res.status(500).json({
         message: "Lỗi server",
+      });
+    }
+  },
+  editNews: async (req, res) => {
+    //require req.body.newsId
+    try {
+      const category_Rooms_Id = req.body.roomType;
+      const province = req.body.province;
+      const district = req.body.district;
+      const ward = req.body.ward;
+      const house_Number = req.body.house_Number;
+      const title = req.body.title;
+      const description = req.body.description;
+      const price = req.body.price;
+      const acreage = req.body.acreage;
+      const status = req.body.status;
+      const object = req.body.object;
+      const news = await NewsModel.findByPk(req.body.newsId);
+      if (news) {
+        await NewsModel.update(
+          {
+            province: province || news.dataValues.province,
+            district: district || news.dataValues.district,
+            ward: ward || news.dataValues.ward,
+            house_Number: house_Number || news.dataValues.house_Number,
+            title: title || news.dataValues.title,
+            description: description || news.dataValues.description,
+            price: price || news.dataValues.price,
+            acreage: acreage || news.dataValues.acreage,
+            status: status || news.dataValues.status,
+            category_Rooms_Id:
+              category_Rooms_Id || news.dataValues.category_Rooms_Id,
+            object: object || news.dataValues.object,
+          },
+          {
+            where: {
+              ID: req.body.newsId,
+            },
+          },
+        );
+        if (req.files.length > 0) {
+          const listImages = req.files.map((item) => {
+            return {
+              news_Id: req.body.newsId,
+              image_URL: item.path,
+            };
+          });
+          await ImagesModel.bulkCreate(listImages);
+        }
+        res.status(200).json({
+          message: "Cập nhật tin đăng thành công",
+        });
+      } else {
+        res.status(404).json({
+          message: "Tin này không tồn tại!",
+        });
+      }
+    } catch (error) {
+      for (var item of req.files) {
+        cloudinary.api.delete_resources(
+          item.filename,
+          function (error, result) {
+            if (error) {
+              return res.status(501).json({
+                message: error,
+              });
+            }
+          },
+        );
+      }
+      res.status(500).json({
+        message: "Lỗi server",
+      });
+    }
+  },
+  deleteImage: async (req, res) => {
+    const imageId = req.body.imageId;
+    const path =
+      req.body.image_URL
+        .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+        .split(".")[0]
+        .split("/")[1] +
+      "/" +
+      req.body.image_URL
+        .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+        .split(".")[0]
+        .split("/")[2];
+
+    cloudinary.api.delete_resources(path, function (error, result) {
+      if (error) {
+        return res.status(501).json({
+          message: error,
+        });
+      }
+    });
+    await ImagesModel.destroy({
+      where: {
+        ID: imageId,
+      },
+    });
+    res.status(200).json({
+      message: "Xóa ảnh thành công",
+    });
+
+    try {
+    } catch (error) {
+      res.status(500).json({
+        message: "Lỗi server!",
       });
     }
   },

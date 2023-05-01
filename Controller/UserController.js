@@ -161,12 +161,21 @@ const UserController = {
     const email = req.body.email;
     const fullName = req.body.fullName;
     const phone = req.body.phone;
-    console.log(req.file.size === 76582);
-
     try {
       const user = await UserModel.findByPk(userId);
-      if (req.file.size === 76582) {
-        const path = req.file.filename;
+
+      if (req.file) {
+        const path = `${
+          user.dataValues.image_URL
+            .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+            .split(".")[0]
+            .split("/")[1]
+        }/${
+          user.dataValues.image_URL
+            .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+            .split(".")[0]
+            .split("/")[2]
+        }`;
         cloudinary.api.delete_resources(path, function (error, result) {
           if (error) {
             return res.status(501).json({
@@ -180,8 +189,7 @@ const UserController = {
           email: email,
           full_Name: fullName,
           phone: phone,
-          image_URL:
-            req.file.size === 76582 ? user.dataValues.image_URL : req.file.path,
+          image_URL: !req.file ? user.dataValues.image_URL : req.file.path,
         },
         {
           where: {
@@ -204,6 +212,44 @@ const UserController = {
       });
       res.status(500).json({
         message: "Lỗi server",
+      });
+    }
+  },
+  resetPassword: async (req, res) => {
+    const userId = req.body.userId;
+    const password = req.body.password;
+    const newPassword = req.body.newPassword;
+
+    try {
+      const user = await UserModel.findByPk(userId);
+      const validPassword = await bcrypt.compare(
+        password,
+        user.dataValues.password,
+      );
+      if (validPassword) {
+        const salt = await bcrypt.genSalt(10);
+        const passwordHashed = await bcrypt.hash(newPassword, salt);
+        await UserModel.update(
+          {
+            password: passwordHashed,
+          },
+          {
+            where: {
+              ID: userId,
+            },
+          },
+        );
+        res.status(200).json({
+          message: "Cập nhật mật khẩu thành công!",
+        });
+      } else {
+        res.status(403).json({
+          message: "Mật khẩu cũ không đúng!",
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        message: "Lỗi Server",
       });
     }
   },

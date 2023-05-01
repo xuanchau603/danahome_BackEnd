@@ -26,6 +26,11 @@ authRoutes.get(
   UserController.getUserById,
 );
 authRoutes.post("/login", UserController.loginUser);
+authRoutes.post(
+  "/resetPassword",
+  middlewareController.verifyToken,
+  UserController.resetPassword,
+);
 authRoutes.post("/register", UserController.registerUser);
 authRoutes.put(
   "/edit",
@@ -51,6 +56,17 @@ newsRoutes.post(
   middlewareController.verifyToken,
   middlewareController.uploadCloudImages,
   NewsController.createNews,
+);
+newsRoutes.put(
+  "/update",
+  middlewareController.verifyToken,
+  middlewareController.uploadCloudImages,
+  NewsController.editNews,
+);
+newsRoutes.delete(
+  "/image/delete",
+  middlewareController.verifyToken,
+  NewsController.deleteImage,
 );
 
 newsRoutes.delete(
