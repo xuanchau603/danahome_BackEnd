@@ -348,7 +348,7 @@ const NewsController = {
         description: description,
         price: price,
         acreage: acreage,
-        status: status ? status : 0,
+        status: status ? status : 1,
         expire_At: expire_At,
         user_Id: user_Id,
         category_Rooms_Id: category_Rooms_Id,
