@@ -1,4 +1,9 @@
-const { RoleModel, UserModel, VerifyCodeModel } = require("../Model");
+const {
+  RoleModel,
+  UserModel,
+  VerifyCodeModel,
+  NewsModel,
+} = require("../Model");
 const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -8,15 +13,47 @@ const UserController = {
   getAllUser: async (req, res) => {
     try {
       const users = await UserModel.findAll({
-        include: {
-          model: RoleModel,
-          attributes: ["role_Name"],
+        include: [
+          {
+            model: RoleModel,
+            attributes: ["role_Name"],
+          },
+          {
+            model: NewsModel,
+          },
+        ],
+        where: {
+          [Op.and]: [
+            {
+              type: req.query.type
+                ? req.query.type
+                : {
+                    [Op.ne]: null,
+                  },
+            },
+            {
+              role_Id: req.query.roleId
+                ? req.query.roleId
+                : {
+                    [Op.ne]: null,
+                  },
+            },
+          ],
         },
+      });
+
+      const newData = users.map((item) => {
+        const { password, role, news, ...data } = item.dataValues;
+        return {
+          ...data,
+          role_Name: item.dataValues.role.role_Name,
+          total_News: item.dataValues.news.length,
+        };
       });
 
       res.status(200).json({
         message: "Thành công",
-        list_User: users,
+        data: newData,
       });
     } catch (error) {
       res.status(500).json({
@@ -65,6 +102,12 @@ const UserController = {
           model: RoleModel,
         },
       });
+      if (user.dataValues.type === 3) {
+        return res.status(403).json({
+          message:
+            "Tài khoản của bạn đã bị khóa! Liên hệ quản trị viên để được mở khóa tài khoản.",
+        });
+      }
 
       const validPassword = await bcrypt.compare(
         password,
@@ -161,6 +204,8 @@ const UserController = {
     const email = req.body.email;
     const fullName = req.body.fullName;
     const phone = req.body.phone;
+    const type = req.body.type;
+    const roleId = req.body.roleId;
     try {
       const user = await UserModel.findByPk(userId);
 
@@ -190,10 +235,12 @@ const UserController = {
       }
       const updated = await UserModel.update(
         {
-          email: email,
-          full_Name: fullName,
-          phone: phone,
+          email: email || user.dataValues.email,
+          full_Name: fullName || user.dataValues.full_Name,
+          phone: phone || user.dataValues.phone,
           image_URL: !req.file ? user.dataValues.image_URL : req.file.path,
+          type: type || user.dataValues.type,
+          role_Id: roleId || user.dataValues.roleId,
         },
         {
           where: {
@@ -206,14 +253,16 @@ const UserController = {
         data: updated,
       });
     } catch (error) {
-      const path = req.file.filename;
-      cloudinary.api.delete_resources(path, function (error, result) {
-        if (error) {
-          return res.status(501).json({
-            message: error,
-          });
-        }
-      });
+      if (req.file) {
+        const path = req.file.filename;
+        cloudinary.api.delete_resources(path, function (error, result) {
+          if (error) {
+            return res.status(501).json({
+              message: error,
+            });
+          }
+        });
+      }
       res.status(500).json({
         message: "Lỗi server",
       });

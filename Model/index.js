@@ -73,7 +73,7 @@ const UserModel = db.define(
     type: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0,
+      defaultValue: 2,
     },
     full_Name: {
       type: DataTypes.STRING,
@@ -192,6 +192,11 @@ const NewsModel = db.define(
     },
 
     status: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+      allowNull: false,
+    },
+    news_Views: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       allowNull: false,

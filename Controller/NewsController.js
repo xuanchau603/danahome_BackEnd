@@ -7,6 +7,7 @@ const {
 } = require("../Model");
 const cloudinary = require("cloudinary").v2;
 const { Op } = require("sequelize");
+const moment = require("moment");
 
 const NewsController = {
   getAllNews: async (req, res) => {
@@ -22,7 +23,7 @@ const NewsController = {
         },
         {
           model: CateNewsModel,
-          attributes: ["name"],
+          attributes: ["name", "price"],
         },
         {
           model: UserModel,
@@ -142,10 +143,26 @@ const NewsController = {
         province,
         district,
         ward,
+        status,
         ...data
       } = item.dataValues;
       const subImages = [...item.dataValues.images];
       subImages.splice(0, 1);
+      if (moment() >= moment(item.dataValues.expire_At)) {
+        const updateStatus = async () => {
+          await NewsModel.update(
+            {
+              status: 3,
+            },
+            {
+              where: {
+                ID: item.dataValues.ID,
+              },
+            },
+          );
+        };
+        updateStatus();
+      }
 
       return {
         ...data,
@@ -161,6 +178,10 @@ const NewsController = {
           code: ward.split(",")[0],
           name: ward.split(",")[1],
         },
+        status:
+          moment() >= moment(item.dataValues.expire_At)
+            ? 3
+            : item.dataValues.status,
         featured_Image: item.dataValues.images[0]?.image_URL,
         subImages,
         total_Image: item.dataValues.images.length,
@@ -170,6 +191,7 @@ const NewsController = {
         poster_Image_URL: item.dataValues.user.image_URL,
         roomType: item.dataValues.category_Room.name,
         newsType: item.dataValues.category_New.name,
+        newsTypePrice: item.dataValues.category_New.price,
       };
     });
 
@@ -192,7 +214,7 @@ const NewsController = {
         },
         {
           model: CateNewsModel,
-          attributes: ["name"],
+          attributes: ["name", "price"],
         },
         {
           model: UserModel,
@@ -211,6 +233,9 @@ const NewsController = {
           {
             categorys_News_Id: "b8bc8bc5-e417-11ed-99e0-ecf4bbc11824",
           },
+          {
+            status: "2",
+          },
         ],
       },
       order: [["createdAt", "DESC"]],
@@ -227,10 +252,26 @@ const NewsController = {
         province,
         district,
         ward,
+        status,
         ...data
       } = item.dataValues;
       const subImages = [...item.dataValues.images];
       subImages.splice(0, 1);
+      if (moment() >= moment(item.dataValues.expire_At)) {
+        const updateStatus = async () => {
+          await NewsModel.update(
+            {
+              status: 3,
+            },
+            {
+              where: {
+                ID: item.dataValues.ID,
+              },
+            },
+          );
+        };
+        updateStatus();
+      }
 
       return {
         ...data,
@@ -248,6 +289,10 @@ const NewsController = {
         },
         featured_Image: item.dataValues.images[0]?.image_URL,
         subImages,
+        status:
+          moment() >= moment(item.dataValues.expire_At)
+            ? 3
+            : item.dataValues.status,
         total_Image: item.dataValues.images.length,
         posterVIP: item.dataValues.user.type === 1,
         poster: item.dataValues.user.full_Name,
@@ -255,6 +300,7 @@ const NewsController = {
         poster_Image_URL: item.dataValues.user.image_URL,
         roomType: item.dataValues.category_Room.name,
         newsType: item.dataValues.category_New.name,
+        newsTypePrice: item.dataValues.category_New.price,
       };
     });
 
@@ -266,6 +312,16 @@ const NewsController = {
   getDetailsNews: async (req, res) => {
     try {
       const newsId = req.params.id;
+      await NewsModel.increment(
+        {
+          news_Views: +1,
+        },
+        {
+          where: {
+            ID: newsId,
+          },
+        },
+      );
       const news = await NewsModel.findByPk(newsId, {
         include: [
           {
@@ -274,7 +330,7 @@ const NewsController = {
           },
           {
             model: CateNewsModel,
-            attributes: ["name"],
+            attributes: ["name", "price"],
           },
           {
             model: UserModel,
@@ -319,6 +375,7 @@ const NewsController = {
             poster_Image_URL: news.dataValues.user.image_URL,
             roomType: news.dataValues.category_Room.name,
             newsType: news.dataValues.category_New.name,
+            newsTypePrice: news.dataValues.category_New.price,
           },
         });
       } else {
@@ -457,6 +514,7 @@ const NewsController = {
       const acreage = req.body.acreage;
       const status = req.body.status;
       const object = req.body.object;
+      const expire_At = req.body.expire_At;
       const news = await NewsModel.findByPk(req.body.newsId);
       if (news) {
         await NewsModel.update(
@@ -470,6 +528,7 @@ const NewsController = {
             price: price || news.dataValues.price,
             acreage: acreage || news.dataValues.acreage,
             status: status || news.dataValues.status,
+            expire_At: expire_At || news.dataValues.expire_At,
             category_Rooms_Id:
               category_Rooms_Id || news.dataValues.category_Rooms_Id,
             object: object || news.dataValues.object,
