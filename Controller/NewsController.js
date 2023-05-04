@@ -130,8 +130,8 @@ const NewsController = {
         ],
       },
       order: [[orderBy, orderType]],
-      offset: page * 10,
-      limit: 10,
+      offset: page * 5,
+      limit: 5,
     });
 
     const newData = news.map((item) => {
@@ -149,19 +149,21 @@ const NewsController = {
       const subImages = [...item.dataValues.images];
       subImages.splice(0, 1);
       if (moment() >= moment(item.dataValues.expire_At)) {
-        const updateStatus = async () => {
-          await NewsModel.update(
-            {
-              status: 3,
-            },
-            {
-              where: {
-                ID: item.dataValues.ID,
+        if (item.dataValues.status !== 3) {
+          const updateStatus = async () => {
+            await NewsModel.update(
+              {
+                status: 3,
               },
-            },
-          );
-        };
-        updateStatus();
+              {
+                where: {
+                  ID: item.dataValues.ID,
+                },
+              },
+            );
+          };
+          updateStatus();
+        }
       }
 
       return {
@@ -194,12 +196,109 @@ const NewsController = {
         newsTypePrice: item.dataValues.category_New.price,
       };
     });
+    const totalNews = await NewsModel.count({
+      where: {
+        [Op.and]: [
+          {
+            category_Rooms_Id: req.query.roomsType
+              ? {
+                  [Op.like]: req.query.roomsType,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            province: req.query.province
+              ? {
+                  [Op.like]: req.query.province,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            district: req.query.district
+              ? {
+                  [Op.like]: req.query.district,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            ward: req.query.ward
+              ? {
+                  [Op.like]: req.query.ward,
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            price: req.query.priceTo
+              ? {
+                  [Op.and]:
+                    req.query.priceFrom === req.query.priceTo
+                      ? {
+                          [Op.gte]: req.query.priceTo * 1000000,
+                        }
+                      : {
+                          [Op.gte]: req.query.priceFrom * 1000000,
+                          [Op.lte]: req.query.priceTo * 1000000,
+                        },
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            acreage: req.query.acreageTo
+              ? {
+                  [Op.and]:
+                    req.query.acreageFrom === req.query.acreageTo
+                      ? {
+                          [Op.gte]: req.query.acreageTo,
+                        }
+                      : {
+                          [Op.gte]: req.query.acreageFrom,
+                          [Op.lte]: req.query.acreageTo,
+                        },
+                }
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            user_Id: req.query.userId
+              ? req.query.userId
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            categorys_News_Id: req.query.categoryNewsId
+              ? req.query.categoryNewsId
+              : {
+                  [Op.ne]: null,
+                },
+          },
+          {
+            status: req.query.status
+              ? req.query.status
+              : {
+                  [Op.ne]: null,
+                },
+          },
+        ],
+      },
+    });
 
     res.status(200).json({
       message: "Thành công",
       data: newData,
       currentPage: page + 1,
-      totalNews: await NewsModel.count(),
+      totalNews,
     });
   },
   getNewsHot: async (req, res) => {
@@ -312,16 +411,7 @@ const NewsController = {
   getDetailsNews: async (req, res) => {
     try {
       const newsId = req.params.id;
-      await NewsModel.increment(
-        {
-          news_Views: +1,
-        },
-        {
-          where: {
-            ID: newsId,
-          },
-        },
-      );
+
       const news = await NewsModel.findByPk(newsId, {
         include: [
           {
@@ -342,6 +432,18 @@ const NewsController = {
           },
         ],
       });
+      if (news.dataValues.status === 2) {
+        await NewsModel.increment(
+          {
+            news_Views: +1,
+          },
+          {
+            where: {
+              ID: newsId,
+            },
+          },
+        );
+      }
       if (news) {
         const {
           province,
@@ -517,40 +619,46 @@ const NewsController = {
       const expire_At = req.body.expire_At;
       const news = await NewsModel.findByPk(req.body.newsId);
       if (news) {
-        await NewsModel.update(
-          {
-            province: province || news.dataValues.province,
-            district: district || news.dataValues.district,
-            ward: ward || news.dataValues.ward,
-            house_Number: house_Number || news.dataValues.house_Number,
-            title: title || news.dataValues.title,
-            description: description || news.dataValues.description,
-            price: price || news.dataValues.price,
-            acreage: acreage || news.dataValues.acreage,
-            status: status || news.dataValues.status,
-            expire_At: expire_At || news.dataValues.expire_At,
-            category_Rooms_Id:
-              category_Rooms_Id || news.dataValues.category_Rooms_Id,
-            object: object || news.dataValues.object,
-          },
-          {
-            where: {
-              ID: req.body.newsId,
+        if (req.user.id === news.dataValues.ID || req.user.isAdmin) {
+          await NewsModel.update(
+            {
+              province: province || news.dataValues.province,
+              district: district || news.dataValues.district,
+              ward: ward || news.dataValues.ward,
+              house_Number: house_Number || news.dataValues.house_Number,
+              title: title || news.dataValues.title,
+              description: description || news.dataValues.description,
+              price: price || news.dataValues.price,
+              acreage: acreage || news.dataValues.acreage,
+              status: status || news.dataValues.status,
+              expire_At: expire_At || news.dataValues.expire_At,
+              category_Rooms_Id:
+                category_Rooms_Id || news.dataValues.category_Rooms_Id,
+              object: object || news.dataValues.object,
             },
-          },
-        );
-        if (req.files.length > 0) {
-          const listImages = req.files.map((item) => {
-            return {
-              news_Id: req.body.newsId,
-              image_URL: item.path,
-            };
+            {
+              where: {
+                ID: req.body.newsId,
+              },
+            },
+          );
+          if (req.files.length > 0) {
+            const listImages = req.files.map((item) => {
+              return {
+                news_Id: req.body.newsId,
+                image_URL: item.path,
+              };
+            });
+            await ImagesModel.bulkCreate(listImages);
+          }
+          res.status(200).json({
+            message: "Cập nhật tin đăng thành công",
           });
-          await ImagesModel.bulkCreate(listImages);
+        } else {
+          res.status(403).json({
+            message: "Bạn không có quyền cập nhật bài đăng này!",
+          });
         }
-        res.status(200).json({
-          message: "Cập nhật tin đăng thành công",
-        });
       } else {
         res.status(404).json({
           message: "Tin này không tồn tại!",

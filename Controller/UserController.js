@@ -11,6 +11,7 @@ const cloudinary = require("cloudinary").v2;
 
 const UserController = {
   getAllUser: async (req, res) => {
+    const page = req.query.page || 1;
     try {
       const users = await UserModel.findAll({
         include: [
@@ -40,6 +41,8 @@ const UserController = {
             },
           ],
         },
+        offset: (page - 1) * 5,
+        limit: 5,
       });
 
       const newData = users.map((item) => {
@@ -50,10 +53,31 @@ const UserController = {
           total_News: item.dataValues.news.length,
         };
       });
+      const totalUser = await UserModel.count({
+        where: {
+          [Op.and]: [
+            {
+              type: req.query.type
+                ? req.query.type
+                : {
+                    [Op.ne]: null,
+                  },
+            },
+            {
+              role_Id: req.query.roleId
+                ? req.query.roleId
+                : {
+                    [Op.ne]: null,
+                  },
+            },
+          ],
+        },
+      });
 
       res.status(200).json({
         message: "Thành công",
         data: newData,
+        totalUser,
       });
     } catch (error) {
       res.status(500).json({
@@ -275,11 +299,7 @@ const UserController = {
 
     try {
       const user = await UserModel.findByPk(userId);
-      const validPassword = await bcrypt.compare(
-        password,
-        user.dataValues.password,
-      );
-      if (validPassword) {
+      if (req.user.isAdmin) {
         const salt = await bcrypt.genSalt(10);
         const passwordHashed = await bcrypt.hash(newPassword, salt);
         await UserModel.update(
@@ -292,12 +312,38 @@ const UserController = {
             },
           },
         );
-        res.status(200).json({
+        return res.status(200).json({
           message: "Cập nhật mật khẩu thành công!",
         });
+      } else if (user.dataValues.ID === req.user.id) {
+        const validPassword = await bcrypt.compare(
+          password,
+          user.dataValues.password,
+        );
+        if (validPassword) {
+          const salt = await bcrypt.genSalt(10);
+          const passwordHashed = await bcrypt.hash(newPassword, salt);
+          await UserModel.update(
+            {
+              password: passwordHashed,
+            },
+            {
+              where: {
+                ID: userId,
+              },
+            },
+          );
+          res.status(200).json({
+            message: "Cập nhật mật khẩu thành công!",
+          });
+        } else {
+          res.status(403).json({
+            message: "Mật khẩu cũ không đúng!",
+          });
+        }
       } else {
         res.status(403).json({
-          message: "Mật khẩu cũ không đúng!",
+          message: "Bạn không có quyền thay đổi mật khẩu tài khoản này!",
         });
       }
     } catch (error) {
