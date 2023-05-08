@@ -127,6 +127,18 @@ const NewsController = {
                   [Op.ne]: null,
                 },
           },
+          // {
+          //   expire_At: req.query.expire_At
+          //     ? {
+          //         [Op.and]: {
+          //           [Op.gte]: req.query.expire_At,
+          //           // [Op.lte]: req.query.expire_At ,
+          //         },
+          //       }
+          //     : {
+          //         [Op.ne]: null,
+          //       },
+          // },
         ],
       },
       order: [[orderBy, orderType]],
@@ -516,7 +528,7 @@ const NewsController = {
         description: description,
         price: price,
         acreage: acreage,
-        status: status ? status : 1,
+        status: status ? status : 5,
         expire_At: expire_At,
         user_Id: user_Id,
         category_Rooms_Id: category_Rooms_Id,
@@ -532,6 +544,7 @@ const NewsController = {
       await ImagesModel.bulkCreate(listImages);
       res.status(200).json({
         message: "Đăng tin thành công",
+        data: news,
       });
     } catch (error) {
       for (var item of req.files) {
@@ -619,7 +632,7 @@ const NewsController = {
       const expire_At = req.body.expire_At;
       const news = await NewsModel.findByPk(req.body.newsId);
       if (news) {
-        if (req.user.id === news.dataValues.ID || req.user.isAdmin) {
+        if (req.user.id === news.dataValues.user_Id || req.user.isAdmin) {
           await NewsModel.update(
             {
               province: province || news.dataValues.province,

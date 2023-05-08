@@ -99,6 +99,11 @@ const UserModel = db.define(
       defaultValue:
         "https://res.cloudinary.com/di5qmcigy/image/upload/v1682486641/avatar_user/a_m4jkyd.png",
     },
+    amount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
+    },
   },
   {
     timestamps: true,
@@ -267,6 +272,61 @@ const ImagesModel = db.define(
   },
 );
 
+const PaymentModel = db.define(
+  "payments",
+  {
+    ID: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV1,
+      allowNull: false,
+      primaryKey: true,
+    },
+    user_Id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: UserModel,
+        key: "ID",
+      },
+    },
+    news_Id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: NewsModel,
+        key: "ID",
+      },
+    },
+    amount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "description",
+    },
+    payment_Type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "1",
+    },
+    order_Id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "1",
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
 RoleModel.hasMany(UserModel, { foreignKey: "role_Id" });
 UserModel.belongsTo(RoleModel, { foreignKey: "role_Id" });
 
@@ -282,6 +342,12 @@ NewsModel.belongsTo(UserModel, { foreignKey: "user_Id" });
 NewsModel.hasMany(ImagesModel, { foreignKey: "news_Id" });
 ImagesModel.belongsTo(NewsModel, { foreignKey: "news_Id" });
 
+UserModel.hasMany(PaymentModel, { foreignKey: "user_Id" });
+PaymentModel.belongsTo(UserModel, { foreignKey: "user_Id" });
+
+NewsModel.hasMany(PaymentModel, { foreignKey: "news_Id" });
+PaymentModel.belongsTo(NewsModel, { foreignKey: "news_Id" });
+
 db.sync();
 
 module.exports = {
@@ -292,4 +358,5 @@ module.exports = {
   CateNewsModel,
   NewsModel,
   ImagesModel,
+  PaymentModel,
 };

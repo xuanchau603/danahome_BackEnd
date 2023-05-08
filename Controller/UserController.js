@@ -224,58 +224,64 @@ const UserController = {
     }
   },
   editUser: async (req, res) => {
-    const userId = req.body.userId;
+    const userId = req.user.id;
     const email = req.body.email;
     const fullName = req.body.fullName;
     const phone = req.body.phone;
     const type = req.body.type;
+    const amount = req.body.amount;
     const roleId = req.body.roleId;
+    const user = await UserModel.findByPk(userId);
     try {
-      const user = await UserModel.findByPk(userId);
-
-      if (
-        req.file &&
-        !user.dataValues.image_URL ===
-          "https://res.cloudinary.com/di5qmcigy/image/upload/v1682486641/avatar_user/a_m4jkyd.png"
-      ) {
-        const path = `${
-          user.dataValues.image_URL
-            .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
-            .split(".")[0]
-            .split("/")[1]
-        }/${
-          user.dataValues.image_URL
-            .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
-            .split(".")[0]
-            .split("/")[2]
-        }`;
-        cloudinary.api.delete_resources(path, function (error, result) {
-          if (error) {
-            return res.status(501).json({
-              message: error,
-            });
-          }
+      if (userId === user.dataValues.ID || req.user.isAdmin) {
+        if (
+          req.file &&
+          !user.dataValues.image_URL ===
+            "https://res.cloudinary.com/di5qmcigy/image/upload/v1682486641/avatar_user/a_m4jkyd.png"
+        ) {
+          const path = `${
+            user.dataValues.image_URL
+              .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+              .split(".")[0]
+              .split("/")[1]
+          }/${
+            user.dataValues.image_URL
+              .split("https://res.cloudinary.com/di5qmcigy/image/upload/")[1]
+              .split(".")[0]
+              .split("/")[2]
+          }`;
+          cloudinary.api.delete_resources(path, function (error, result) {
+            if (error) {
+              return res.status(501).json({
+                message: error,
+              });
+            }
+          });
+        }
+        await UserModel.update(
+          {
+            email: email || user.dataValues.email,
+            full_Name: fullName || user.dataValues.full_Name,
+            phone: phone || user.dataValues.phone,
+            image_URL: !req.file ? user.dataValues.image_URL : req.file.path,
+            type: type || user.dataValues.type,
+            amount: amount || user.dataValues.amount,
+            role_Id: roleId || user.dataValues.roleId,
+          },
+          {
+            where: {
+              ID: userId,
+            },
+          },
+        );
+        res.status(200).json({
+          message: "Cập nhật thông tin tài khoản thành công",
+        });
+      } else {
+        res.status(401).json({
+          message: "Bạn không có quyền sửa thông tin tài khoản này!",
         });
       }
-      const updated = await UserModel.update(
-        {
-          email: email || user.dataValues.email,
-          full_Name: fullName || user.dataValues.full_Name,
-          phone: phone || user.dataValues.phone,
-          image_URL: !req.file ? user.dataValues.image_URL : req.file.path,
-          type: type || user.dataValues.type,
-          role_Id: roleId || user.dataValues.roleId,
-        },
-        {
-          where: {
-            ID: userId,
-          },
-        },
-      );
-      res.status(200).json({
-        message: "Cập nhật thông tin tài khoản thành công",
-        data: updated,
-      });
     } catch (error) {
       if (req.file) {
         const path = req.file.filename;

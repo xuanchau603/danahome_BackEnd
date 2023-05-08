@@ -3,6 +3,7 @@ const authRoutes = express.Router();
 const verifyRoutes = express.Router();
 const newsRoutes = express.Router();
 const cateRoutes = express.Router();
+const paymentRoutes = express.Router();
 
 //middleware
 const middlewareController = require("../Controller/middlewareController");
@@ -12,6 +13,7 @@ const UserController = require("../Controller/UserController");
 const VerifyCodeController = require("../Controller/VerifyCodeController");
 const NewsController = require("../Controller/NewsController");
 const categoryController = require("../Controller/categoryController");
+const PaymentController = require("../Controller/PaymentController");
 
 //Authentication route
 
@@ -75,9 +77,38 @@ newsRoutes.delete(
   NewsController.deleteNews,
 );
 
+//Payment route
+paymentRoutes.post(
+  "/create",
+  middlewareController.verifyToken,
+  PaymentController.createPayment,
+);
+
+paymentRoutes.post(
+  "/pay-with-momo",
+  middlewareController.verifyToken,
+  PaymentController.createPaymentMomo,
+);
+paymentRoutes.post(
+  "/ipn-momo",
+  // middlewareController.verifyToken,
+  PaymentController.notifyPaymentMomo,
+);
+paymentRoutes.post(
+  "/pay-with-vnpay",
+  middlewareController.verifyToken,
+  PaymentController.createPaymentVnpay,
+);
+paymentRoutes.post(
+  "/ipn-vnpay",
+  // middlewareController.verifyToken,
+  PaymentController.notifyPaymentVnpay,
+);
+
 module.exports = {
   authRoutes,
   verifyRoutes,
   newsRoutes,
   cateRoutes,
+  paymentRoutes,
 };

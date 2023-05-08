@@ -75,6 +75,7 @@ const middlewareController = {
     uploadAvatar(req, res, function (err) {
       if (err instanceof multer.MulterError) {
         // A Multer error occurred when uploading.
+        console.log("loi fwgsr");
         return res.status(401).json(err);
       } else if (err) {
         // An unknown error occurred when uploading.

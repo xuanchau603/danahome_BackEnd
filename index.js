@@ -9,6 +9,7 @@ const {
   verifyRoutes,
   newsRoutes,
   cateRoutes,
+  paymentRoutes,
 } = require("./Routes");
 
 app.use(cors());
@@ -24,6 +25,12 @@ app.use("/category", cateRoutes);
 app.use("/users", authRoutes);
 app.use("/verifyCode", verifyRoutes);
 app.use("/news", newsRoutes);
+app.use("/payment", paymentRoutes);
+
+app.post("/return", (req, res) => {
+  console.log(123);
+  res.json("ok");
+});
 
 app.listen(8002, () => {
   console.log("Server is running at port 802");
