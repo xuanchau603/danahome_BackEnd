@@ -78,6 +78,13 @@ newsRoutes.delete(
 );
 
 //Payment route
+
+paymentRoutes.get(
+  "/:id",
+  middlewareController.verifyToken,
+  PaymentController.getPayment,
+);
+
 paymentRoutes.post(
   "/create",
   middlewareController.verifyToken,

@@ -104,6 +104,11 @@ const UserModel = db.define(
       allowNull: false,
       defaultValue: 0,
     },
+    VIP_Expire_At: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     timestamps: true,

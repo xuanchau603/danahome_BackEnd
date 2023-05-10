@@ -8,6 +8,7 @@ const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
+const moment = require("moment");
 
 const UserController = {
   getAllUser: async (req, res) => {
@@ -47,6 +48,23 @@ const UserController = {
 
       const newData = users.map((item) => {
         const { password, role, news, ...data } = item.dataValues;
+        if (moment() >= moment(item.dataValues.VIP_Expire_At)) {
+          if (item.dataValues.type === 1) {
+            const updateStatus = async () => {
+              await UserModel.update(
+                {
+                  type: 2,
+                },
+                {
+                  where: {
+                    ID: item.dataValues.ID,
+                  },
+                },
+              );
+            };
+            updateStatus();
+          }
+        }
         return {
           ...data,
           role_Name: item.dataValues.role.role_Name,
@@ -224,13 +242,14 @@ const UserController = {
     }
   },
   editUser: async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.body.userId || req.user.id;
     const email = req.body.email;
     const fullName = req.body.fullName;
     const phone = req.body.phone;
     const type = req.body.type;
     const amount = req.body.amount;
     const roleId = req.body.roleId;
+    const VIP_Expire_At = req.body.VIP_Expire_At;
     const user = await UserModel.findByPk(userId);
     try {
       if (userId === user.dataValues.ID || req.user.isAdmin) {
@@ -258,6 +277,7 @@ const UserController = {
             }
           });
         }
+
         await UserModel.update(
           {
             email: email || user.dataValues.email,
@@ -267,6 +287,7 @@ const UserController = {
             type: type || user.dataValues.type,
             amount: amount || user.dataValues.amount,
             role_Id: roleId || user.dataValues.roleId,
+            VIP_Expire_At: VIP_Expire_At || user.dataValues.VIP_Expire_At,
           },
           {
             where: {

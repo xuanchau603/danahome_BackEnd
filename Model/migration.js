@@ -2,10 +2,10 @@ const { DataTypes } = require("sequelize");
 const db = require("./dbConnect");
 
 const queryInterface = db.getQueryInterface();
-queryInterface.addColumn("users", "amount", {
-  type: DataTypes.FLOAT,
+queryInterface.addColumn("users", "VIP_Expire_At", {
+  type: DataTypes.DATE,
   allowNull: false,
-  defaultValue: 0,
+  defaultValue: DataTypes.NOW,
 });
 
 db.sync();
