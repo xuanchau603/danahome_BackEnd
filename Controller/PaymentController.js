@@ -424,7 +424,7 @@ const PaymentController = {
             await PaymentModel.create({
               news_Id: newsId || null,
               user_Id: userId,
-              amount: vnp_Params["vnp_Amount"],
+              amount: parseFloat(vnp_Params["vnp_Amount"]) / 100,
               description: vnp_Params["vnp_OrderInfo"],
               order_Id: orderId,
               status: "2",
