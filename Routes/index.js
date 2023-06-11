@@ -4,6 +4,8 @@ const verifyRoutes = express.Router();
 const newsRoutes = express.Router();
 const cateRoutes = express.Router();
 const paymentRoutes = express.Router();
+const reviewsRoutes = express.Router();
+const statisticsRoutes = express.Router();
 
 //middleware
 const middlewareController = require("../Controller/middlewareController");
@@ -14,6 +16,7 @@ const VerifyCodeController = require("../Controller/VerifyCodeController");
 const NewsController = require("../Controller/NewsController");
 const categoryController = require("../Controller/categoryController");
 const PaymentController = require("../Controller/PaymentController");
+const reviewsController = require("../Controller/reviewsController");
 
 //Authentication route
 
@@ -46,7 +49,38 @@ verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
 
 //Category route
 cateRoutes.get("/rooms", categoryController.getAllCategoryRooms);
+cateRoutes.post(
+  "/rooms/create",
+  middlewareController.verifyToken,
+  categoryController.CreateCategoryRoom,
+);
+cateRoutes.put(
+  "/rooms/update",
+  middlewareController.verifyToken,
+  categoryController.UpdateCategoryRoom,
+);
+cateRoutes.delete(
+  "/rooms/delete",
+  middlewareController.verifyToken,
+  categoryController.DeleteCategoryRoom,
+);
+
 cateRoutes.get("/news", categoryController.getAllCategoryNews);
+cateRoutes.post(
+  "/news/create",
+  middlewareController.verifyToken,
+  categoryController.CreateCategoryNews,
+);
+cateRoutes.put(
+  "/news/update",
+  middlewareController.verifyToken,
+  categoryController.UpdateCategoryNews,
+);
+cateRoutes.delete(
+  "/news/delete",
+  middlewareController.verifyToken,
+  categoryController.DeleteCategoryNews,
+);
 
 //News route
 newsRoutes.get("/", NewsController.getAllNews);
@@ -112,10 +146,36 @@ paymentRoutes.post(
   PaymentController.notifyPaymentVnpay,
 );
 
+reviewsRoutes.post(
+  "/create",
+  middlewareController.verifyToken,
+  reviewsController.CreateReview,
+);
+
+reviewsRoutes.get(
+  "/",
+  middlewareController.verifyToken,
+  reviewsController.GetAllReviews,
+);
+
+reviewsRoutes.delete(
+  "/delete/:id",
+  middlewareController.verifyToken,
+  reviewsController.DeleteReview,
+);
+
+statisticsRoutes.get(
+  "/",
+  middlewareController.verifyToken,
+  categoryController.Statistics,
+);
+
 module.exports = {
   authRoutes,
   verifyRoutes,
   newsRoutes,
   cateRoutes,
   paymentRoutes,
+  reviewsRoutes,
+  statisticsRoutes,
 };

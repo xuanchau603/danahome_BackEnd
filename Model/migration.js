@@ -2,10 +2,9 @@ const { DataTypes } = require("sequelize");
 const db = require("./dbConnect");
 
 const queryInterface = db.getQueryInterface();
-queryInterface.addColumn("users", "VIP_Expire_At", {
-  type: DataTypes.DATE,
+queryInterface.addColumn("reviews", "title", {
+  type: DataTypes.STRING,
   allowNull: false,
-  defaultValue: DataTypes.NOW,
 });
 
 db.sync();

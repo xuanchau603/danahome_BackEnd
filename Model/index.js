@@ -332,6 +332,41 @@ const PaymentModel = db.define(
   },
 );
 
+const ReviewsModel = db.define(
+  "reviews",
+  {
+    ID: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    point: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    user_Id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: UserModel,
+        key: "ID",
+      },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
 RoleModel.hasMany(UserModel, { foreignKey: "role_Id" });
 UserModel.belongsTo(RoleModel, { foreignKey: "role_Id" });
 
@@ -343,6 +378,9 @@ NewsModel.belongsTo(CateNewsModel, { foreignKey: "categorys_News_Id" });
 
 UserModel.hasMany(NewsModel, { foreignKey: "user_Id" });
 NewsModel.belongsTo(UserModel, { foreignKey: "user_Id" });
+
+UserModel.hasMany(ReviewsModel, { foreignKey: "user_Id" });
+ReviewsModel.belongsTo(UserModel, { foreignKey: "user_Id" });
 
 NewsModel.hasMany(ImagesModel, { foreignKey: "news_Id" });
 ImagesModel.belongsTo(NewsModel, { foreignKey: "news_Id" });
@@ -364,4 +402,5 @@ module.exports = {
   NewsModel,
   ImagesModel,
   PaymentModel,
+  ReviewsModel,
 };

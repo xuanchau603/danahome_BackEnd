@@ -10,6 +10,8 @@ const {
   newsRoutes,
   cateRoutes,
   paymentRoutes,
+  reviewsRoutes,
+  statisticsRoutes,
 } = require("./Routes");
 
 app.use(cors());
@@ -26,6 +28,8 @@ app.use("/users", authRoutes);
 app.use("/verifyCode", verifyRoutes);
 app.use("/news", newsRoutes);
 app.use("/payment", paymentRoutes);
+app.use("/reviews", reviewsRoutes);
+app.use("/statistics", statisticsRoutes);
 
 app.post("/return", (req, res) => {
   console.log(123);
