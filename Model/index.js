@@ -64,7 +64,7 @@ const UserModel = db.define(
     role_Id: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: "e4bae67b-e413-11ed-99e0-ecf4bbc11824",
+      defaultValue: "d8a578b2-6819-11ee-812d-ecf4bbc11824",
       references: {
         model: RoleModel,
         key: "ID",

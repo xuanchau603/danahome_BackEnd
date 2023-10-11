@@ -43,8 +43,8 @@ const VerifyCodeController = {
           // config mail server
           service: "Gmail",
           auth: {
-            user: "lexuanchau2001@gmail.com",
-            pass: "rcyvwplufnibppfg",
+            user: "lexuanchau",
+            pass: "cwhllcpdrtntfbwp",
           },
         });
         const mainOptions = {
