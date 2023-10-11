@@ -1,9 +1,9 @@
 const { Sequelize } = require("sequelize");
 
 const db = new Sequelize(
-  "bdsnpcox_danahome",
-  "bdsnpcox_danahome",
-  "lexuanchau2001",
+  "mbsysyur_danahome",
+  "mbsysyur_danahome",
+  "123456",
   {
     host: "free02.123host.vn",
     dialect: "mysql",
