@@ -342,7 +342,7 @@ const NewsController = {
             category_Rooms_Id: roomType ? roomType : { [Op.ne]: null },
           },
           {
-            categorys_News_Id: "b8bc8bc5-e417-11ed-99e0-ecf4bbc11824",
+            categorys_News_Id: "d9006c26-6cf0-11ee-812d-ecf4bbc11824",
           },
           {
             status: "2",
