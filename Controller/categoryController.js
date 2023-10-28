@@ -24,7 +24,7 @@ const categoryController = {
     try {
       const name = req.body.name;
       await CateRoomModel.create({
-        name,
+        name: name,
       });
       res.status(200).json({
         message: "Tạo mới loại bất động sản thành công",
@@ -156,17 +156,82 @@ const categoryController = {
           type: 1,
         },
       });
+      const total_Normal_User = total_User - total_Vip_User;
+      const total_Admin_Account = await UserModel.count({
+        where: {
+          role_Id: "d8a56e49-6819-11ee-812d-ecf4bbc11824",
+        },
+      });
+      
       const total_News = await NewsModel.count();
-      const total_Active_News = await NewsModel.count({
+      const total_Vip_News = await NewsModel.count({
+        where: {
+          categorys_News_Id: "d9006c26-6cf0-11ee-812d-ecf4bbc11824",
+        },
+      });
+      const total_Normal_News = total_News - total_Vip_News;
+      const total_Vip_Active_News = await NewsModel.count({
         where: {
           status: 2,
+          categorys_News_Id: "d9006c26-6cf0-11ee-812d-ecf4bbc11824",
         },
       });
-      const total_Expired_News = await NewsModel.count({
+      const total_Vip_Expired_News = await NewsModel.count({
         where: {
           status: 3,
+          categorys_News_Id: "d9006c26-6cf0-11ee-812d-ecf4bbc11824",
         },
       });
+      const total_Normal_Active_News = await NewsModel.count({
+        where: {
+          status: 2,
+          categorys_News_Id: "964b839f-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+      const total_Normal_Expired_News = await NewsModel.count({
+        where: {
+          status: 3,
+          categorys_News_Id: "964b839f-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+
+      const total_Motel = await CateRoomModel.count({
+        where: {
+          ID: "d5edb92e-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+      
+      const total_House = await CateRoomModel.count({
+        where: {
+          ID: "4c1ea538-6cf3-11ee-812d-ecf4bbc11824",
+        },
+      });
+
+      const total_Apartment = await CateRoomModel.count({
+        where: {
+          ID: "d5edd16c-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+
+      const total_News_Motel = await NewsModel.count({
+        where: {
+          category_Rooms_Id: "d5edb92e-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+      
+      const total_News_House = await NewsModel.count({
+        where: {
+          category_Rooms_Id: "4c1ea538-6cf3-11ee-812d-ecf4bbc11824",
+        },
+      });
+
+      const total_News_Apartment = await NewsModel.count({
+        where: {
+          ID: "d5edd16c-681e-11ee-812d-ecf4bbc11824",
+        },
+      });
+
+
       const listSalesAmout = await PaymentModel.findAll({
         attributes: ["amount"],
       });
@@ -182,9 +247,21 @@ const categoryController = {
         message: "Thành công",
         total_User,
         total_Vip_User,
+        total_Normal_User,
+        total_Admin_Account,
         total_News,
-        total_Active_News,
-        total_Expired_News,
+        total_Vip_News,
+        total_Vip_Active_News,
+        total_Vip_Expired_News,
+        total_Normal_News,
+        total_Normal_Active_News,
+        total_Normal_Expired_News,
+        total_Motel,
+        total_House,
+        total_Apartment,
+        total_News_Motel,
+        total_News_House,
+        total_News_Apartment,
         sales_Amount,
       });
     } catch (error) {

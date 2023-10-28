@@ -51,12 +51,10 @@ verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
 cateRoutes.get("/rooms", categoryController.getAllCategoryRooms);
 cateRoutes.post(
   "/rooms/create",
-  middlewareController.verifyToken,
   categoryController.CreateCategoryRoom,
 );
 cateRoutes.put(
   "/rooms/update",
-  middlewareController.verifyToken,
   categoryController.UpdateCategoryRoom,
 );
 cateRoutes.delete(
@@ -73,12 +71,10 @@ cateRoutes.post(
 );
 cateRoutes.put(
   "/news/update",
-  middlewareController.verifyToken,
   categoryController.UpdateCategoryNews,
 );
 cateRoutes.delete(
   "/news/delete",
-  middlewareController.verifyToken,
   categoryController.DeleteCategoryNews,
 );
 
