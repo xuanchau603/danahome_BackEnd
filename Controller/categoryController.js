@@ -227,7 +227,7 @@ const categoryController = {
 
       const total_News_Apartment = await NewsModel.count({
         where: {
-          ID: "d5edd16c-681e-11ee-812d-ecf4bbc11824",
+          category_Rooms_Id: "d5edd16c-681e-11ee-812d-ecf4bbc11824",
         },
       });
 
