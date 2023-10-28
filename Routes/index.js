@@ -66,7 +66,6 @@ cateRoutes.delete(
 cateRoutes.get("/news", categoryController.getAllCategoryNews);
 cateRoutes.post(
   "/news/create",
-  middlewareController.verifyToken,
   categoryController.CreateCategoryNews,
 );
 cateRoutes.put(
