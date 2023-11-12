@@ -7,21 +7,22 @@ const {
   ImagesModel,
 } = require("../Model");
 const { Op } = require("sequelize");
+const { log } = require("console");
 
 function sortObject(obj) {
-  let sorted = {};
-  let str = [];
-  let key;
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      str.push(encodeURIComponent(key));
+	let sorted = {};
+	let str = [];
+	let key;
+	for (key in obj){
+		if (obj.hasOwnProperty(key)) {
+		str.push(encodeURIComponent(key));
+		}
+	}
+	str.sort();
+    for (key = 0; key < str.length; key++) {
+        sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
     }
-  }
-  str.sort();
-  for (key = 0; key < str.length; key++) {
-    sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
-  }
-  return sorted;
+    return sorted;
 }
 
 const PaymentController = {
@@ -247,32 +248,32 @@ const PaymentController = {
   createPaymentVnpay: (resquest, respone) => {
     //require amount, userId
 
-    var tmnCode = "YDPX0R9W";
-    var secretKey = "JYGLMASANCWCHRQEQPYBYDFFYKEDIJJN";
-    var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    var returnUrl = "https://danahome.onrender.com/return";
-    // var returnUrl = "http://localhost:3000/return";
-    var createDate = moment().format("YYYYMMDDHHmmss");
-    var orderId =
-      resquest.body.newsId +
-      "_" +
-      `${new Date().getTime() + Math.floor(Math.random() * 9999) + 1}`;
-    var amount = resquest.body.amount;
-    var orderInfo = resquest.body.orderInfo;
-    var locale = "vn";
-    var currCode = "VND";
-    var vnp_Params = {};
-    vnp_Params["vnp_Version"] = "2.1.0";
-    vnp_Params["vnp_Command"] = "pay";
-    vnp_Params["vnp_TmnCode"] = tmnCode;
-    vnp_Params["vnp_Amount"] = amount * 100;
-    vnp_Params["vnp_CreateDate"] = createDate;
-    vnp_Params["vnp_CurrCode"] = currCode;
-    vnp_Params["vnp_IpAddr"] = "192.168.1.103";
-    vnp_Params["vnp_Locale"] = locale;
-    vnp_Params["vnp_OrderInfo"] = orderInfo;
-    vnp_Params["vnp_ReturnUrl"] = returnUrl;
-    vnp_Params["vnp_TxnRef"] = orderId;
+    // var tmnCode = "AEWS7RD0";
+    // var secretKey = "ZCHLDUDXMMHEJIJVINWWRZGNRYBTUGFT";
+    // var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    // var returnUrl = "https://danahome.onrender.com/return";
+    // // var returnUrl = "http://localhost:3000/return";
+    // var createDate = moment().format("YYYYMMDDHHmmss");
+    // var orderId =
+    //   resquest.body.newsId +
+    //   "_" +
+    //   `${new Date().getTime() + Math.floor(Math.random() * 9999) + 1}`;
+    // var amount = resquest.body.amount;
+    // var orderInfo = resquest.body.orderInfo;
+    // var locale = "vn";
+    // var currCode = "VND";
+    // var vnp_Params = {};
+    // vnp_Params["vnp_Version"] = "2.1.0";
+    // vnp_Params["vnp_Command"] = "pay";
+    // vnp_Params["vnp_TmnCode"] = tmnCode;
+    // vnp_Params["vnp_Amount"] = 4 * 100;
+    // vnp_Params["vnp_CreateDate"] = createDate;
+    // vnp_Params["vnp_CurrCode"] = currCode;
+    // vnp_Params["vnp_IpAddr"] = "192.168.1.103";
+    // vnp_Params["vnp_Locale"] = locale;
+    // vnp_Params["vnp_OrderInfo"] = "orderInfo";
+    // vnp_Params["vnp_ReturnUrl"] = returnUrl;
+    // vnp_Params["vnp_TxnRef"] = "orderId";
 
     // vnp_Params = sortObject(vnp_Params);
 
@@ -285,20 +286,90 @@ const PaymentController = {
     // vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
     
 
+    // vnp_Params = sortObject(vnp_Params);
+
+    // var querystring = require('qs');
+    // var signData = querystring.stringify(vnp_Params, { encode: false });
+    // var crypto = require("crypto");     
+    // var hmac = crypto.createHmac("sha512", secretKey);
+    // var signed = hmac.update(new Buffer.from(signData, 'utf-8')).digest("hex"); 
+    // vnp_Params['vnp_SecureHash'] = signed;
+    // vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+
+    // console.log(vnp_Params);
+
+    
+
+
+    //////////////////////////////////////////////////
+
+    //process.env.TZ = 'Asia/Ho_Chi_Minh';
+
+    var crypto = require("crypto");
+   
+    var tmnCode = "AEWS7RD0";
+    var secretKey = "ZCHLDUDXMMHEJIJVINWWRZGNRYBTUGFT";
+    var vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    var returnUrl = "https://danahome.onrender.com/return";
+    var orderId =
+     resquest.body.newsId +
+     "_" +
+      `${new Date().getTime() + Math.floor(Math.random() * 9999) + 1}`;
+    var amount = resquest.body.amount;
+     var orderInfo = resquest.body.orderInfo;
+    
+    process.env.TZ = 'Asia/Ho_Chi_Minh';
+    
+    let date = new Date();
+    let createDate = moment(date).format('YYYYMMDDHHmmss');
+    
+    let ipAddr = resquest.headers['x-forwarded-for'] ||
+    resquest.connection.remoteAddress ||
+    resquest.socket.remoteAddress ||
+    resquest.connection.socket.remoteAddress;
+
+
+    
+    
+    let locale = resquest.body.language;
+    if(locale === null || locale === ''){
+        locale = 'vn';
+    }
+    let currCode = 'VND';
+    let vnp_Params = {};
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = tmnCode;
+    vnp_Params['vnp_Locale'] = "vn";
+    vnp_Params['vnp_CurrCode'] = currCode;
+    vnp_Params['vnp_TxnRef'] = orderId;
+    vnp_Params['vnp_OrderInfo'] = orderInfo;
+    vnp_Params['vnp_OrderType'] = 'other';
+    vnp_Params['vnp_Amount'] = amount * 100;
+    vnp_Params['vnp_ReturnUrl'] = returnUrl;
+    vnp_Params['vnp_IpAddr'] = ipAddr;
+    vnp_Params['vnp_CreateDate'] = createDate;
+    // if(bankCode !== null && bankCode !== ''){
+    //     vnp_Params['vnp_BankCode'] = bankCode;
+    // }
+
     vnp_Params = sortObject(vnp_Params);
 
-    var querystring = require('qs');
-    var signData = querystring.stringify(vnp_Params, { encode: false });
+    console.log(vnp_Params)
+
+    let querystring = require('qs');
+    let signData = querystring.stringify(vnp_Params, { encode: false });
     var crypto = require("crypto");     
-    var hmac = crypto.createHmac("sha512", secretKey);
-    var signed = hmac.update(new Buffer.from(signData, 'utf-8')).digest("hex"); 
+    let hmac = crypto.createHmac("sha512", secretKey);
+    let signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
     vnp_Params['vnp_SecureHash'] = signed;
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-
+    
     respone.status(200).json({
       message: "Thành công!",
       payUrl: vnpUrl,
     });
+    
 
   },
   notifyPaymentVnpay: async (req, res) => {
