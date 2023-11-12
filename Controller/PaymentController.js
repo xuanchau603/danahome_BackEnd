@@ -373,7 +373,8 @@ const PaymentController = {
 
   },
   notifyPaymentVnpay: async (req, res) => {
-    var secretKey = "JYGLMASANCWCHRQEQPYBYDFFYKEDIJJN";
+    var tmnCode = "AEWS7RD0";
+    var secretKey = "ZCHLDUDXMMHEJIJVINWWRZGNRYBTUGFT";
 
     let vnp_Params = req.query;
     let secureHash = vnp_Params["vnp_SecureHash"];
