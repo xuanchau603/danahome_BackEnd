@@ -274,19 +274,32 @@ const PaymentController = {
     vnp_Params["vnp_ReturnUrl"] = returnUrl;
     vnp_Params["vnp_TxnRef"] = orderId;
 
+    // vnp_Params = sortObject(vnp_Params);
+
+    // var querystring = require("qs");
+    // var signData = querystring.stringify(vnp_Params, { encode: false });
+    // var crypto = require("crypto");
+    // var hmac = crypto.createHmac("sha512", secretKey);
+    // var signed = hmac.update(new Buffer.from(signData)).digest("hex");
+    // vnp_Params["vnp_SecureHash"] = signed;
+    // vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+    
+
     vnp_Params = sortObject(vnp_Params);
 
-    var querystring = require("qs");
+    var querystring = require('qs');
     var signData = querystring.stringify(vnp_Params, { encode: false });
-    var crypto = require("crypto");
+    var crypto = require("crypto");     
     var hmac = crypto.createHmac("sha512", secretKey);
-    var signed = hmac.update(new Buffer.from(signData)).digest("hex");
-    vnp_Params["vnp_SecureHash"] = signed;
-    vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+    var signed = hmac.update(new Buffer.from(signData, 'utf-8')).digest("hex"); 
+    vnp_Params['vnp_SecureHash'] = signed;
+    vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+
     respone.status(200).json({
       message: "Thành công!",
       payUrl: vnpUrl,
     });
+
   },
   notifyPaymentVnpay: async (req, res) => {
     var secretKey = "JYGLMASANCWCHRQEQPYBYDFFYKEDIJJN";
