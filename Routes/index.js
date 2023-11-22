@@ -46,6 +46,7 @@ authRoutes.put(
 
 //VerifyCode route
 verifyRoutes.post("/create", VerifyCodeController.createVerifyCode);
+verifyRoutes.post("/response-review", VerifyCodeController.createResponseReview);
 
 //Category route
 cateRoutes.get("/rooms", categoryController.getAllCategoryRooms);
